@@ -181,6 +181,11 @@ public:
         _m_Buffer = __buffer;
     }
 
+    ~basic_string()
+    {
+        _m_Allocator.deallocate(_m_Buffer, 0);
+    }
+
     constexpr basic_string& operator=(const basic_string& str) noexcept
     {
         _m_Length = str._m_Length;
