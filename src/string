@@ -1,6 +1,7 @@
 #pragma once
 
 #include "_btypes.h"
+#include "initializer_list"
 #include "memory"
 #include "utility"
 
@@ -253,12 +254,119 @@ public:
 
     constexpr const_reference at(size_type pos) const
     {
-        return this[pos];
+        return operator[](pos);
     }
 
     constexpr reference at(size_type pos)
     {
-        return this[pos];
+        return operator[](pos);
+    }
+
+    constexpr const_reference front() const
+    {
+        return operator[](0);
+    }
+
+    constexpr reference front()
+    {
+        return operator[](0);
+    }
+
+    constexpr const _Cy& back() const
+    {
+        return operator[](_m_Length - 1);
+    }
+
+    constexpr _Cy& back()
+    {
+        return operator[](_m_Length - 1);
+    }
+
+    constexpr basic_string& append(const _Cy* buffer, size_type size)
+    {
+        if (_m_Length + size >= _m_Capacity)
+        {
+            this->resize_buffers(_m_Length + size);
+        }
+
+        _Try::move(_m_Buffer + _m_Length, buffer, size);
+        _m_Length += size;
+        return *this;
+    }
+
+    constexpr basic_string& append(const _Cy* buffer)
+    {
+        return this->append(buffer, _Try::length(buffer));
+    }
+
+    constexpr void push_back(_Cy c)
+    {
+        this->append(1, c);
+    }
+
+    constexpr basic_string& assign(const basic_string& str)
+    {
+        return *this = str;
+    }
+
+    constexpr basic_string& assign(const _Cy* buffer, size_type size)
+    {
+        if (_m_Length < size)
+        {
+            this->resize_buffers(size);
+        }
+
+        _m_Length = size;
+        _Try::move(_m_Buffer, buffer, size);
+        return *this;
+    }
+
+    constexpr basic_string& assign(const _Cy* buffer)
+    {
+        return this->assign(buffer, _Try::length(buffer));
+    }
+
+    constexpr basic_string& assign(initializer_list<_Cy> il)
+    {
+        return this->assign(il.begin(), il.size());
+    }
+
+    constexpr basic_string& insert(size_type pos, const _Cy* buffer, size_type size)
+    {
+        if (pos > _m_Length)
+        {
+            pos = _m_Length;
+        }
+    
+        if (size > _m_Capacity)
+        {
+            this->resize_buffers(_m_Capacity + size);
+        }
+
+        _Try::move(_m_Buffer + pos + size, _m_Buffer + pos, size);
+        _Try::move(_m_Buffer + pos, buffer, size);
+        return *this;
+    }
+
+    constexpr const _Cy* data() const noexcept
+    {
+        return _m_Buffer;
+    }
+
+    constexpr const _Cy* c_str() const noexcept
+    {
+        return _m_Buffer;
+    }
+
+private:
+    constexpr void resize_buffers(size_type newsize)
+    {
+        size_type factual = newsize < _m_Length ? _m_Length : newsize;
+        _Cy* neobuffer = _m_Allocator.allocate(newsize);
+        _Try::copy(neobuffer, _m_Buffer, factual);
+        std::swap(neobuffer, _m_Buffer);
+        _m_Allocator.deallocate(neobuffer, 0);
+        _m_Capacity = newsize;
     }
 
 private:
