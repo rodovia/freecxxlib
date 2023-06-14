@@ -1,0 +1,38 @@
+#pragma once
+
+#include "_btypes.h"
+#include "type_traits"
+
+namespace std
+{
+
+template<class _Ty>
+class allocator
+{
+public:
+    using value_type = _Ty;
+    using size_type = size_t;
+    using difference_type = ptrdiff_t;
+    using propagate_on_container_move_assignment = true_type;
+
+    constexpr allocator() noexcept
+    {}
+    ~allocator()
+    {}
+
+    constexpr allocator(const allocator&) noexcept = default;
+    template<class _Ny> constexpr allocator(const allocator<_Ny>&) noexcept;
+    constexpr allocator& operator=(const allocator&) = default;
+    
+    [[nodiscard]] constexpr _Ty* allocate(size_type size)
+    {
+        return new _Ty[size];
+    }
+
+    constexpr void deallocate(_Ty* p, size_t n)
+    {
+        delete[] p;
+    }
+};
+
+}

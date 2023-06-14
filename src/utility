@@ -1,0 +1,13 @@
+#pragma once
+
+namespace std
+{
+
+template<class _Ty> void swap(_Ty& item1, _Ty& item2) noexcept
+{
+    _Ty tmp = item2;
+    item2 = item1;
+    item1 = tmp;
+}
+
+}

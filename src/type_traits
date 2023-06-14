@@ -1,0 +1,170 @@
+#pragma once
+
+#include "_btypes.h"
+
+#ifndef _FCL_TYPE_TRAITS_H
+#define _FCL_TYPE_TRAITS_H
+
+#define __integral_const(T)                                 \
+    template<> struct is_integral<signed T> : true_type {};  \
+    template<> struct is_integral<const T> : true_type {};    \
+    template<> struct is_integral<unsigned T> : true_type {};  \
+    template<> struct is_integral<const unsigned T> : true_type {};
+
+#define __fp_const(T) \
+    template<> struct is_floating_point<T> : true_type {};  \
+    template<> struct is_floating_point<const T> : true_type {};
+
+namespace std {
+
+    template<class _Ty, _Ty _Valuey> struct integral_constant
+    {
+        static constexpr _Ty value = _Valuey;
+
+        using value_type = _Ty;
+        using type = integral_constant<_Ty, _Valuey>;
+
+        constexpr operator value_type() const noexcept
+        {
+            return value;
+        }
+
+        constexpr value_type operator()() const noexcept
+        {
+            return value;
+        }
+    };
+
+    template<bool _By> 
+    using bool_constant = integral_constant<bool, _By>;
+    using true_type = bool_constant<true>;
+    using false_type = bool_constant<false>;
+
+    template<bool _Conditiony, class _Theny, class _Elsey>
+    struct __if
+    {};
+    
+    template<class _Theny, class _Elsey>
+    struct __if<true, _Theny, _Elsey>
+    {
+        using type = _Theny; 
+    };
+
+    template<class _Theny, class _Elsey>    
+    struct __if<false, _Theny, _Elsey>
+    {
+        using type = _Elsey;
+    };
+
+    /* Primary category types */
+
+    template<class _Ty> 
+    struct is_void : false_type
+    {};
+
+    template<>
+    struct is_void<void> : true_type
+    {};
+
+    template<class _Ty> 
+    struct is_nullptr_t : false_type
+    {};
+
+    template<>
+    struct is_nullptr_t<nullptr_t> : true_type
+    {};
+
+    template<class _Ty>
+    struct is_integral : false_type
+    {};
+
+    __integral_const(char);
+    __integral_const(short int);
+    __integral_const(int);
+    __integral_const(long int);
+    __integral_const(long long int);
+
+    template<>
+    struct is_integral<bool> : true_type
+    {};
+
+
+    template<>
+    struct is_integral<const bool> : true_type
+    {};
+
+    template<class _Ty>
+    struct is_floating_point : false_type
+    {};
+
+    __fp_const(float);
+    __fp_const(double);
+    __fp_const(long double);
+
+    template<class _Ty>
+    struct is_array : false_type
+    {};
+
+    template<class _Ty>
+    struct is_array<_Ty[]> : true_type
+    {};
+
+    template<class _Ty, std::size_t _Sizey>
+    struct is_array<_Ty[_Sizey]> : true_type
+    {};
+
+    template<class _Ty>
+    struct is_function : false_type
+    {};
+
+    template<class _Ty>
+    struct is_function<_Ty()> : true_type
+    {};
+
+    template<class _Ty>
+    struct is_lvalue_reference : false_type
+    {};
+
+    template<class _Ty>
+    struct is_lvalue_reference<_Ty&> : true_type
+    {};
+
+    template<class _Ty>
+    struct is_rvalue_reference : false_type
+    {};
+
+    template<class _Ty>
+    struct is_rvalue_reference<_Ty&&> : true_type
+    {};
+
+    template<class _Ty>
+    struct is_pointer : false_type
+    {};
+
+    template<class _Ty>
+    struct is_pointer<_Ty*> : true_type
+    {};
+
+    template<class _Ty>
+    struct is_member_object_pointer : false_type
+    {};
+
+    template<class _Ty, class _Clzy>
+    struct is_member_object_pointer<_Ty _Clzy::*> : __if<!is_function<_Ty>::value, true_type, false_type>
+    {};
+
+    template<class _Ty>
+    struct is_member_function_pointer : false_type
+    {};
+
+    template<class _Ty, class _Clzy>
+    struct is_member_function_pointer<_Ty _Clzy::*> : __if<is_function<_Ty>::value, true_type, false_type>
+    {};
+
+}
+
+#undef __integral_const
+
+#endif
+
+

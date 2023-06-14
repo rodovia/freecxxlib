@@ -1,0 +1,27 @@
+#pragma once
+
+#include "_btypes.h"
+
+#ifndef _FCL_CSTDDEF_H
+#define _FCL_CSTDDEF_H
+
+extern "C++" namespace std {
+
+enum class byte : unsigned char {};
+
+template<class _Ty> constexpr byte& operator<<=(byte& b, _Ty shift) noexcept;
+template<class _Ty> constexpr byte operator<<(byte b, _Ty shift) noexcept;
+template<class _Ty> constexpr byte& operator>>=(byte& b, _Ty shift) noexcept;
+template<class _Ty> constexpr byte operator>>(byte b, _Ty shift) noexcept;
+constexpr byte& operator|=(byte& l, byte r) noexcept;
+constexpr byte operator|(byte l, byte r) noexcept;
+constexpr byte& operator&=(byte& l, byte r) noexcept;
+constexpr byte operator&(byte l, byte r) noexcept;
+constexpr byte& operator^=(byte& l, byte r) noexcept;
+constexpr byte operator^(byte l, byte r) noexcept;
+constexpr byte operator~(byte b) noexcept;
+template<class _Ty> constexpr _Ty to_integer(byte b) noexcept;
+
+}
+
+#endif

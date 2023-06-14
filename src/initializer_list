@@ -1,0 +1,55 @@
+#pragma once
+
+#include "cstddef"
+
+namespace std {
+
+template<class _Ty>
+class initializer_list
+{
+private:
+    size_t _m_Length;
+    const _Ty* _m_Begin;
+public:
+    using value_type = _Ty;
+    using reference = const _Ty&;
+    using const_reference = const _Ty&;
+    using size_type = size_t;
+
+    using iterator = const _Ty*;
+    using const_iterator = const _Ty*;
+
+    constexpr initializer_list()
+        : _m_Length(0),
+        _m_Begin(nullptr)
+    {}
+
+    constexpr iterator begin() const noexcept
+    {
+        return _m_Begin;
+    };
+
+    constexpr iterator end() const noexcept
+    {
+        return _m_Begin + _m_Length;
+    }
+
+    constexpr size_type size() const noexcept
+    {
+        return _m_Length;
+    }
+};
+
+template<class _Ty>
+constexpr const _Ty* begin(initializer_list<_Ty> init) noexcept
+{
+    return init.begin();
+}
+
+template<class _Ty>
+constexpr const _Ty* end(initializer_list<_Ty> init) noexcept
+{
+    return init.end();
+}
+
+}

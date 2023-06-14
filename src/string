@@ -1,0 +1,273 @@
+#pragma once
+
+#include "_btypes.h"
+#include "memory"
+#include "utility"
+
+namespace std {
+
+template<class _Ty>
+struct char_traits
+{
+    static_assert(true, "No traits for non-char type");
+};
+
+template<>
+struct char_traits<char>
+{
+    using char_type = char;
+    using int_type = int;
+    /* off_type, pos_type, state_type and comparison_category are purposefully omitted */
+
+    static constexpr void assign(char_type& c1, const char_type& c2) noexcept
+    {
+        c1 = c2;
+    }
+
+    static constexpr bool eq(char_type c1, char_type c2) noexcept
+    {
+        return c1 == c2;
+    }
+
+    static constexpr bool lt(char_type c1, char_type c2) noexcept
+    {
+        return c1 < c2;
+    }
+
+    static constexpr int compare(const char_type* s1, const char_type* s2, size_t n)
+    {
+        for (int_type i = 0; i < n; i++)
+        {
+            char_type c = s1[i];
+            char_type c2 = s2[i];
+            if (lt(c, c2))
+            {
+                return -1;
+            }
+
+            if (lt(c2, c))
+            {
+                return 1;
+            }
+        }
+
+        return 0;
+    }
+
+    static constexpr size_t length(const char_type* string)
+    {
+        /* TODO: someday remove this const cast */
+        char_type* b = const_cast<char_type*>(string);
+        while(*b != 0) ++b;
+        return b - string;
+    }
+
+    static constexpr const char_type* find(const char_type* s, size_t n,
+                                           const char_type& a)
+    {
+        for (int_type i = 0; i < n; i++)
+        {
+            if (s[i] == a)
+            {
+                return &s[i];
+            }
+        }
+
+        return nullptr;
+    }
+
+    static constexpr char_type* move(char_type* s1, const char_type* s2, size_t n)
+    {
+        /* s1 comes first than s2: copy in reverse */
+        if (s2 > s1 && s1 + n >= s2)
+        {
+            for (int_type c = n; c != 0; c--)
+            {
+                s1[c] = s2[c];
+            }
+
+            return s1;
+        }
+
+        for (int_type c = 0; c < n; c++)
+        {
+            s1[c] = s2[c];
+        }
+
+        return s1;
+    }
+
+    static constexpr char_type* copy(char_type* s1, const char_type* s2, size_t n)
+    {
+        for (int_type c = 0; c < n; c++)
+        {
+            s1[c] = s2[c];
+        }
+
+        return s1;
+    }
+
+    static constexpr char_type* assign(char_type* s, size_t n, char_type a)
+    {
+        for (int_type i = 0; i < n; i++)
+        {
+            s[i] = a;
+        }
+
+        return s;
+    }
+
+    /* not_eof, to_char_type, to_int_type, eq_int_type and eof where purposefully omitted */
+};
+
+template<class _Cy, class _Try = char_traits<_Cy>, class _Aly = allocator<_Cy>>
+class basic_string
+{
+public:
+    using traits_type = _Try;
+    using value_type = _Cy;
+    using allocator_type = _Aly;
+    using size_type = typename _Aly::size_type; /* NONCOMPLIANT */
+    using reference = _Cy&;
+    using const_reference = const _Cy&;
+
+    static constexpr size_type npos = size_type(-1);
+
+    /* Some constructors were omitted. */
+
+    constexpr basic_string() noexcept(noexcept(_Aly())) 
+        : basic_string(_Aly())
+    {
+    }
+
+    constexpr explicit basic_string(const _Aly& a) noexcept
+        : _m_Length(0),
+          _m_Capacity(0),
+          _m_Buffer(nullptr),
+          _m_Allocator(a)
+    {
+    }
+
+    constexpr explicit basic_string(const basic_string& str)
+        : _m_Length(str._m_Length),
+          _m_Capacity(str._m_Capacity),
+          _m_Buffer(str._m_Buffer),
+          _m_Allocator(str._m_Allocator)
+    {
+    }
+
+    constexpr explicit basic_string(basic_string&& str) noexcept
+    {
+        std::swap(_m_Length, str._m_Length);
+        std::swap(_m_Capacity, str._m_Capacity);
+        std::swap(_m_Buffer, str._m_Buffer);
+        std::swap(_m_Allocator, str._m_Allocator);
+    }
+
+    constexpr basic_string(const _Cy* str, size_type n, const _Aly& a = _Aly())
+        : _m_Length(n),
+          _m_Capacity(_m_Length),
+          _m_Buffer(str)
+    {
+    }
+
+    constexpr basic_string(const _Cy* str, const _Aly& a = _Aly())
+        : _m_Length(_Try::length(str)),
+          _m_Capacity(_m_Length)
+    {
+        _Cy* __buffer = _m_Allocator.allocate(_m_Capacity);
+        _Try::copy(__buffer, str, _m_Capacity);
+        _m_Buffer = __buffer;
+    }
+
+    constexpr basic_string& operator=(const basic_string& str) noexcept
+    {
+        _m_Length = str._m_Length;
+        _m_Capacity = str._m_Capacity;
+        _Cy* buffer = _m_Allocator.allocate(_m_Capacity);
+
+        _Try::move(buffer, str._m_Buffer, _m_Length);
+        std::swap(buffer, _m_Buffer);
+
+        if (buffer != nullptr)
+        {
+            _m_Allocator.deallocate(buffer, 0);
+        }
+        return *this;
+    }
+
+    constexpr basic_string& operator=(basic_string&& str) noexcept
+    {
+        std::swap(_m_Buffer, str._m_Buffer);
+        _m_Length = str._m_Length;
+        _m_Capacity = str._m_Capacity;
+        return *this;
+    }
+
+    constexpr size_type size() const noexcept
+    {
+        return _m_Length;
+    }
+
+    constexpr size_type length() const noexcept
+    {
+        return _m_Length;
+    }
+
+    /* max_size, resize, resize_and_overwrite were omitted. */
+
+    constexpr size_type capacity() const noexcept
+    {
+        return _m_Capacity;
+    }
+
+    /* reserve was omitted. */
+
+    constexpr void shrink_to_fit()
+    {
+        if (_m_Length != _m_Capacity)
+        {
+            _Cy* neobuffer = _m_Allocator.allocate(_m_Length);
+            _Try::copy(neobuffer, _m_Buffer, _m_Length);
+            _m_Allocator.deallocate(_m_Buffer, 0);
+            _m_Capacity = _m_Length;
+        }
+    }
+
+    /* clear was omitted. */
+
+    [[nodiscard]] constexpr bool empty() const noexcept
+    {
+        return _m_Length == 0;
+    }
+
+    constexpr const_reference operator[](size_type pos) const
+    {
+        return _m_Buffer[pos];
+    }
+
+    constexpr reference operator[](size_type pos) noexcept
+    {
+        return _m_Buffer[pos];
+    }
+
+    constexpr const_reference at(size_type pos) const
+    {
+        return this[pos];
+    }
+
+    constexpr reference at(size_type pos)
+    {
+        return this[pos];
+    }
+
+private:
+    size_type _m_Length;
+    size_type _m_Capacity;
+    _Cy* _m_Buffer;
+    _Aly _m_Allocator;
+};
+
+using string = basic_string<char>;
+
+}
