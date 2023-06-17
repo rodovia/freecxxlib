@@ -1,0 +1,17 @@
+#pragma once
+
+namespace std {
+
+template<class _Ty>
+constexpr const _Ty& min(const _Ty& a, const _Ty& b)
+{
+    return (a < b) ? a : b;
+}
+
+template<class _Ty>
+constexpr const _Ty& max(const _Ty&a, const _Ty& b)
+{
+    return (a > b) ? a : b;
+}
+
+}

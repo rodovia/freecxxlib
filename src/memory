@@ -31,6 +31,7 @@ public:
 
     constexpr void deallocate(_Ty* p, size_t n)
     {
+        __FCL_UNUSED(n);
         delete[] p;
     }
 };
