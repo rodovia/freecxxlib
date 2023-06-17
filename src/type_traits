@@ -1,6 +1,6 @@
 #pragma once
 
-#include "_btypes.h"
+#include "internals/_btypes.h"
 
 #ifndef _FCL_TYPE_TRAITS_H
 #define _FCL_TYPE_TRAITS_H
@@ -17,149 +17,157 @@
 
 namespace std {
 
-    template<class _Ty, _Ty _Valuey> struct integral_constant
+template<class _Ty, _Ty _Valuey> struct integral_constant
+{
+    static constexpr _Ty value = _Valuey;
+
+    using value_type = _Ty;
+    using type = integral_constant<_Ty, _Valuey>;
+
+    constexpr operator value_type() const noexcept
     {
-        static constexpr _Ty value = _Valuey;
+        return value;
+    }
 
-        using value_type = _Ty;
-        using type = integral_constant<_Ty, _Valuey>;
-
-        constexpr operator value_type() const noexcept
-        {
-            return value;
-        }
-
-        constexpr value_type operator()() const noexcept
-        {
-            return value;
-        }
-    };
-
-    template<bool _By> 
-    using bool_constant = integral_constant<bool, _By>;
-    using true_type = bool_constant<true>;
-    using false_type = bool_constant<false>;
-
-    template<bool _Conditiony, class _Theny, class _Elsey>
-    struct __if
-    {};
-    
-    template<class _Theny, class _Elsey>
-    struct __if<true, _Theny, _Elsey>
+    constexpr value_type operator()() const noexcept
     {
-        using type = _Theny; 
-    };
+        return value;
+    }
+};
 
-    template<class _Theny, class _Elsey>    
-    struct __if<false, _Theny, _Elsey>
-    {
-        using type = _Elsey;
-    };
+template<bool _By> 
+using bool_constant = integral_constant<bool, _By>;
+using true_type = bool_constant<true>;
+using false_type = bool_constant<false>;
 
-    /* Primary category types */
+template<bool _Conditiony, class _Theny, class _Elsey>
+struct __if
+{};
 
-    template<class _Ty> 
-    struct is_void : false_type
-    {};
+template<class _Theny, class _Elsey>
+struct __if<true, _Theny, _Elsey>
+{
+    using type = _Theny; 
+};
 
-    template<>
-    struct is_void<void> : true_type
-    {};
+template<class _Theny, class _Elsey>    
+struct __if<false, _Theny, _Elsey>
+{
+    using type = _Elsey;
+};
 
-    template<class _Ty> 
-    struct is_nullptr_t : false_type
-    {};
+/* Primary category types */
 
-    template<>
-    struct is_nullptr_t<nullptr_t> : true_type
-    {};
+template<class _Ty> 
+struct is_void : false_type
+{};
 
-    template<class _Ty>
-    struct is_integral : false_type
-    {};
+template<>
+struct is_void<void> : true_type
+{};
 
-    __integral_const(char);
-    __integral_const(short int);
-    __integral_const(int);
-    __integral_const(long int);
-    __integral_const(long long int);
+template<class _Ty> 
+struct is_nullptr_t : false_type
+{};
 
-    template<>
-    struct is_integral<bool> : true_type
-    {};
+template<>
+struct is_nullptr_t<nullptr_t> : true_type
+{};
+
+template<class _Ty>
+struct is_integral : false_type
+{};
+
+__integral_const(char);
+__integral_const(short int);
+__integral_const(int);
+__integral_const(long int);
+__integral_const(long long int);
+
+template<>
+struct is_integral<bool> : true_type
+{};
 
 
-    template<>
-    struct is_integral<const bool> : true_type
-    {};
+template<>
+struct is_integral<const bool> : true_type
+{};
 
-    template<class _Ty>
-    struct is_floating_point : false_type
-    {};
+template<class _Ty>
+struct is_floating_point : false_type
+{};
 
-    __fp_const(float);
-    __fp_const(double);
-    __fp_const(long double);
+__fp_const(float);
+__fp_const(double);
+__fp_const(long double);
 
-    template<class _Ty>
-    struct is_array : false_type
-    {};
+template<class _Ty>
+struct is_array : false_type
+{};
 
-    template<class _Ty>
-    struct is_array<_Ty[]> : true_type
-    {};
+template<class _Ty>
+struct is_array<_Ty[]> : true_type
+{};
 
-    template<class _Ty, std::size_t _Sizey>
-    struct is_array<_Ty[_Sizey]> : true_type
-    {};
+template<class _Ty, std::size_t _Sizey>
+struct is_array<_Ty[_Sizey]> : true_type
+{};
 
-    template<class _Ty>
-    struct is_function : false_type
-    {};
+template<class _Ty>
+struct is_function : false_type
+{};
 
-    template<class _Ty>
-    struct is_function<_Ty()> : true_type
-    {};
+template<class _Ty>
+struct is_function<_Ty()> : true_type
+{};
 
-    template<class _Ty>
-    struct is_lvalue_reference : false_type
-    {};
+template<class _Ty>
+struct is_lvalue_reference : false_type
+{};
 
-    template<class _Ty>
-    struct is_lvalue_reference<_Ty&> : true_type
-    {};
+template<class _Ty>
+struct is_lvalue_reference<_Ty&> : true_type
+{};
 
-    template<class _Ty>
-    struct is_rvalue_reference : false_type
-    {};
+template<class _Ty>
+struct is_rvalue_reference : false_type
+{};
 
-    template<class _Ty>
-    struct is_rvalue_reference<_Ty&&> : true_type
-    {};
+template<class _Ty>
+struct is_rvalue_reference<_Ty&&> : true_type
+{};
 
-    template<class _Ty>
-    struct is_pointer : false_type
-    {};
+template<class _Ty>
+struct is_pointer : false_type
+{};
 
-    template<class _Ty>
-    struct is_pointer<_Ty*> : true_type
-    {};
+template<class _Ty>
+struct is_pointer<_Ty*> : true_type
+{};
 
-    template<class _Ty>
-    struct is_member_object_pointer : false_type
-    {};
+template<class _Ty>
+struct is_member_object_pointer : false_type
+{};
 
-    template<class _Ty, class _Clzy>
-    struct is_member_object_pointer<_Ty _Clzy::*> : __if<!is_function<_Ty>::value, true_type, false_type>
-    {};
+template<class _Ty, class _Clzy>
+struct is_member_object_pointer<_Ty _Clzy::*> : __if<!is_function<_Ty>::value, true_type, false_type>
+{};
 
-    template<class _Ty>
-    struct is_member_function_pointer : false_type
-    {};
+template<class _Ty>
+struct is_member_function_pointer : false_type
+{};
 
-    template<class _Ty, class _Clzy>
-    struct is_member_function_pointer<_Ty _Clzy::*> : __if<is_function<_Ty>::value, true_type, false_type>
-    {};
+template<class _Ty, class _Clzy>
+struct is_member_function_pointer<_Ty _Clzy::*> : __if<is_function<_Ty>::value, true_type, false_type>
+{};
+
+template<typename _Ty>
+struct is_class : false_type
+{};
+
+template<>
+struct is_class<class _Ty> : true_type 
+{};
 
 }
 

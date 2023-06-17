@@ -1,6 +1,6 @@
 #pragma once
 
-#include "_btypes.h"
+#include "internals/_btypes.h"
 #include "initializer_list"
 #include "memory"
 #include "utility"
@@ -190,7 +190,7 @@ public:
 
     ~basic_string()
     {
-        _m_Allocator.deallocate(_m_Buffer, 0);
+        _m_Allocator.deallocate(_m_Buffer, _m_Capacity);
     }
 
     constexpr basic_string& operator=(const basic_string& str) noexcept

@@ -1,0 +1,186 @@
+#pragma once
+
+#include "utility"
+#include "memory"
+#include "initializer_list"
+#include "stdint.h"
+#include "internals/memcpy.h"
+
+namespace std
+{
+
+template<class _Ty, class _Aly = allocator<_Ty>>
+class vector
+{
+public:
+    using value_type = _Ty;
+    using reference = _Ty&;
+    using const_reference = const _Ty&;
+    /* iterator and const_iterator were omitted */
+    using difference_type = int32_t;
+    using size_type = uint32_t;
+
+    /* Some constructors were omitted. */
+
+    constexpr vector()
+        : vector(_Aly())
+    {
+    }
+
+    constexpr vector(initializer_list<_Ty> il, const _Aly& al = _Aly())
+        : _m_Buffer(il.begin())
+    {
+    }
+
+    constexpr explicit vector(const _Aly& a)
+        : _m_Allocator(a),
+        _m_Length(0),
+        _m_Capacity(0),
+        _m_Buffer(nullptr)
+    {
+    }
+    
+    constexpr explicit vector(size_type n, const _Aly& a = _Aly())
+        : _m_Allocator(a),
+          _m_Length(0),
+          _m_Capacity(0),
+          _m_Buffer(nullptr)
+    {
+        _m_Buffer = _m_Allocator.allocate(_m_Capacity);
+    }
+
+    constexpr vector(size_type size, const _Ty& value, const _Aly& al = _Aly())
+        : _m_Allocator(al),
+          _m_Length(size),
+          _m_Capacity(size),
+          _m_Buffer(nullptr)
+    {
+        _m_Buffer = _m_Allocator.allocate(_m_Capacity);
+        __fclabi::__generic_memset(_m_Buffer, value, _m_Capacity);
+    }
+
+    constexpr vector(const vector& vec)
+        : _m_Allocator(vec._m_Allocator),
+          _m_Length(vec._m_Length),
+          _m_Capacity(vec._m_Capacity)
+    {
+        _m_Buffer = _m_Allocator.allocate(_m_Capacity);
+        __fclabi::__generic_memcpy(_m_Buffer, vec._m_Buffer, _m_Length);
+    }
+
+    constexpr vector(vector&& vec) noexcept
+    {
+        std::swap(_m_Buffer, vec._m_Buffer);
+        std::swap(_m_Allocator, vec._m_Allocator);
+        std::swap(_m_Capacity, vec._m_Capacity);
+        std::swap(_m_Length, vec._m_Length);
+    }
+
+    constexpr _Aly get_allocator()
+    {
+        return _m_Allocator;
+    }
+
+    ~vector()
+    {
+        _m_Allocator.deallocate(_m_Buffer, _m_Capacity);
+    }
+
+    [[nodiscard]] constexpr bool empty() const noexcept
+    {
+        return _m_Length == 0;
+    }
+
+    constexpr size_type size() const noexcept
+    {
+        return _m_Length;
+    }
+
+    constexpr size_type capacity() const noexcept
+    {
+        return _m_Capacity;
+    }
+
+    constexpr void swap(vector& other)
+    {
+        std::swap(_m_Allocator, other._m_Allocator);
+        std::swap(_m_Length, other._m_Length);
+        std::swap(_m_Capacity, other._m_Capacity);
+        std::swap(_m_Buffer, other._m_Buffer);
+    }
+
+    constexpr void reserve(size_type size)
+    {
+        if (size > _m_Capacity)
+        {
+            this->resize_buffers(size);
+        }
+    }
+
+    constexpr void shrink_to_fit()
+    {
+        if (_m_Capacity > _m_Length)
+        {
+            this->resize_buffers(_m_Length);
+        }
+    }
+
+    constexpr _Ty* data() noexcept
+    {
+        return _m_Buffer;
+    }
+
+    constexpr const _Ty* data() const noexcept
+    {
+        return _m_Buffer;
+    }
+
+    void push_back(const _Ty& d)
+    {
+        if (_m_Length >= _m_Capacity)
+        {
+            this->resize_buffers(_m_Capacity + 3);
+        }
+
+        _m_Buffer[_m_Length] = d;
+        _m_Length++;
+    }
+
+    void push_back(_Ty&& d)
+    {
+        if (_m_Length >= _m_Capacity)
+        {
+            this->resize_buffers(_m_Capacity + 3);
+        }
+
+        _m_Buffer[_m_Length] = d;
+        _m_Length++;
+    }
+
+private:
+    constexpr void resize_buffers(size_type nsize)
+    {
+        _Ty* buffer = _m_Allocator.allocate(nsize);
+        std::swap(buffer, _m_Buffer);
+        _m_Capacity = nsize;
+        
+        if (buffer != nullptr)
+        {
+            __fclabi::__generic_memcpy(_m_Buffer, buffer, nsize);
+            _m_Allocator.deallocate(buffer, _m_Capacity);
+        }
+    }
+
+    _Aly _m_Allocator;
+    size_type _m_Length;
+    size_type _m_Capacity;
+    _Ty* _m_Buffer;
+};
+
+template<class _Ty>
+constexpr void swap(vector<_Ty>& lhs, vector<_Ty&> rhs) noexcept
+{
+    lhs.swap(rhs);
+}
+
+}
