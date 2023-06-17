@@ -1,8 +1,8 @@
 #pragma once
 
-#include "internals/_btypes.h"
+#include "internals/btypes.h"
 
-namespace std {
+_FCL_NAMESPACE_BEGIN
 
 template<class _Ty>
 class initializer_list
@@ -52,4 +52,4 @@ constexpr const _Ty* end(initializer_list<_Ty> init) noexcept
     return init.end();
 }
 
-}
+_FCL_NAMESPACE_END

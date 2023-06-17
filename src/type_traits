@@ -1,9 +1,6 @@
 #pragma once
 
-#include "internals/_btypes.h"
-
-#ifndef _FCL_TYPE_TRAITS_H
-#define _FCL_TYPE_TRAITS_H
+#include "internals/btypes.h"
 
 #define __integral_const(T)                                 \
     template<> struct is_integral<signed T> : true_type {};  \
@@ -15,7 +12,7 @@
     template<> struct is_floating_point<T> : true_type {};  \
     template<> struct is_floating_point<const T> : true_type {};
 
-namespace std {
+_FCL_NAMESPACE_BEGIN
 
 template<class _Ty, _Ty _Valuey> struct integral_constant
 {
@@ -169,10 +166,8 @@ template<>
 struct is_class<class _Ty> : true_type 
 {};
 
-}
+_FCL_NAMESPACE_END
 
 #undef __integral_const
-
-#endif
 
 

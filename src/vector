@@ -5,9 +5,10 @@
 #include "initializer_list"
 #include "stdint.h"
 #include "internals/memcpy.h"
+#include "internals/iterator.h"
+#include "internals/btypes.h"
 
-namespace std
-{
+_FCL_NAMESPACE_BEGIN
 
 template<class _Ty, class _Aly = allocator<_Ty>>
 class vector
@@ -16,9 +17,9 @@ public:
     using value_type = _Ty;
     using reference = _Ty&;
     using const_reference = const _Ty&;
-    /* iterator and const_iterator were omitted */
-    using difference_type = int32_t;
-    using size_type = uint32_t;
+    using iterator = __fcl::fwd_iterator<_Ty>;
+    using difference_type = typename __fcl::iterator_traits<iterator>::difference_type;
+    using size_type = typename __fcl::iterator_traits<iterator>::difference_type;
 
     /* Some constructors were omitted. */
 
@@ -56,7 +57,7 @@ public:
           _m_Buffer(nullptr)
     {
         _m_Buffer = _m_Allocator.allocate(_m_Capacity);
-        __fclabi::__generic_memset(_m_Buffer, value, _m_Capacity);
+        __fcl::generic_memset(_m_Buffer, value, _m_Capacity);
     }
 
     constexpr vector(const vector& vec)
@@ -65,7 +66,7 @@ public:
           _m_Capacity(vec._m_Capacity)
     {
         _m_Buffer = _m_Allocator.allocate(_m_Capacity);
-        __fclabi::__generic_memcpy(_m_Buffer, vec._m_Buffer, _m_Length);
+        __fcl::generic_memcpy(_m_Buffer, vec._m_Buffer, _m_Length);
     }
 
     constexpr vector(vector&& vec) noexcept
@@ -84,6 +85,16 @@ public:
     ~vector()
     {
         _m_Allocator.deallocate(_m_Buffer, _m_Capacity);
+    }
+
+    constexpr iterator begin() noexcept
+    {
+        return iterator(_m_Buffer);
+    }
+
+    constexpr iterator end() noexcept
+    {
+        return iterator(_m_Buffer + _m_Length);
     }
 
     [[nodiscard]] constexpr bool empty() const noexcept
@@ -157,6 +168,36 @@ public:
         _m_Length++;
     }
 
+    constexpr reference operator[](size_type index)
+    {
+        return _m_Buffer[index];
+    }
+
+    constexpr const_reference operator[](size_type index) const
+    {
+        return _m_Buffer[index];
+    }
+
+    constexpr reference front()
+    {
+        return *_m_Buffer;
+    }
+
+    constexpr reference back()
+    {
+        return _m_Buffer[_m_Length];
+    }
+
+    constexpr const_reference front() const
+    {
+        return *_m_Buffer;
+    }
+
+    constexpr const_reference back() const
+    {
+        return _m_Buffer[_m_Length];
+    }
+
 private:
     constexpr void resize_buffers(size_type nsize)
     {
@@ -166,7 +207,7 @@ private:
         
         if (buffer != nullptr)
         {
-            __fclabi::__generic_memcpy(_m_Buffer, buffer, nsize);
+            __fcl::generic_memcpy(_m_Buffer, buffer, nsize);
             _m_Allocator.deallocate(buffer, _m_Capacity);
         }
     }
@@ -183,4 +224,4 @@ constexpr void swap(vector<_Ty>& lhs, vector<_Ty&> rhs) noexcept
     lhs.swap(rhs);
 }
 
-}
+_FCL_NAMESPACE_END

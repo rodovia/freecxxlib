@@ -1,11 +1,8 @@
 #pragma once
 
-#include "internals/_btypes.h"
+#include "internals/btypes.h"
 
-#ifndef _FCL_CSTDDEF_H
-#define _FCL_CSTDDEF_H
-
-extern "C++" namespace std {
+_FCL_NAMESPACE_BEGIN
 
 enum class byte : unsigned char {};
 
@@ -22,6 +19,4 @@ constexpr byte operator^(byte l, byte r) noexcept;
 constexpr byte operator~(byte b) noexcept;
 template<class _Ty> constexpr _Ty to_integer(byte b) noexcept;
 
-}
-
-#endif
+_FCL_NAMESPACE_END

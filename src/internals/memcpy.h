@@ -1,12 +1,12 @@
 #pragma once
 
-#include "_btypes.h"
+#include "btypes.h"
 
-namespace __fclabi
+namespace __fcl
 {
 
 template<class _Ty>
-constexpr _Ty* __generic_memcpy(_Ty* to, const _Ty* from, size_t size)
+constexpr _Ty* generic_memcpy(_Ty* to, const _Ty* from, size_t size)
 {
     for (size_t i = 0; i < size; i++)
     {
@@ -17,7 +17,7 @@ constexpr _Ty* __generic_memcpy(_Ty* to, const _Ty* from, size_t size)
 }
 
 template<class _Ty>
-constexpr _Ty* __generic_memset(_Ty* to, _Ty value, size_t count)
+constexpr _Ty* generic_memset(_Ty* to, _Ty value, size_t count)
 {
     for (size_t i = 0; i < count; i++)
     {

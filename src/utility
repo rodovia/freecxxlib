@@ -1,7 +1,8 @@
 #pragma once
 
-namespace std
-{
+#include "internals/btypes.h"
+
+_FCL_NAMESPACE_BEGIN
 
 template<class _Ty> void swap(_Ty& item1, _Ty& item2) noexcept
 {
@@ -10,4 +11,4 @@ template<class _Ty> void swap(_Ty& item1, _Ty& item2) noexcept
     item1 = tmp;
 }
 
-}
+_FCL_NAMESPACE_END

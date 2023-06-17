@@ -1,6 +1,8 @@
 #pragma once
 
-namespace std {
+#include "internals/btypes.h"
+
+_FCL_NAMESPACE_BEGIN
 
 template<class _Ty>
 constexpr const _Ty& min(const _Ty& a, const _Ty& b)
@@ -14,4 +16,4 @@ constexpr const _Ty& max(const _Ty&a, const _Ty& b)
     return (a > b) ? a : b;
 }
 
-}
+_FCL_NAMESPACE_END

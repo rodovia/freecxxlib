@@ -1,10 +1,9 @@
 #pragma once
 
-#include "internals/_btypes.h"
+#include "internals/btypes.h"
 #include "type_traits"
 
-namespace std
-{
+_FCL_NAMESPACE_BEGIN
 
 template<class _Ty>
 class allocator
@@ -36,4 +35,4 @@ public:
     }
 };
 
-}
+_FCL_NAMESPACE_END

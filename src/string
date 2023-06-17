@@ -1,12 +1,12 @@
 #pragma once
 
-#include "internals/_btypes.h"
+#include "internals/btypes.h"
 #include "initializer_list"
 #include "memory"
 #include "utility"
 #include "algorithm"
 
-namespace std {
+_FCL_NAMESPACE_BEGIN
 
 template<class _Ty>
 struct char_traits
@@ -433,4 +433,4 @@ constexpr bool operator==(std::basic_string<_Cy, _Try, _Aly> lhs,
 
 using string = basic_string<char>;
 
-}
+_FCL_NAMESPACE_END
