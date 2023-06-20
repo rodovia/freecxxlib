@@ -51,6 +51,9 @@ struct input_iterator
         : _m_Pointer(counter)
     { }
 
+    input_iterator(input_iterator&&) = delete;
+    input_iterator(const input_iterator&) = delete; 
+
     reference operator++() noexcept
     {
         return ++_m_Pointer;
@@ -83,6 +86,9 @@ struct fwd_iterator
         : _m_Pointer(counter)
     { }
 
+    fwd_iterator(fwd_iterator&&) = delete;
+    fwd_iterator(const fwd_iterator&) = delete; 
+
     reference operator++() noexcept
     {
         _m_Pointer++;
@@ -105,6 +111,100 @@ struct fwd_iterator
     }
 
     constexpr bool operator!=(fwd_iterator& it) noexcept
+    {
+        return !operator==(it);
+    }
+
+protected:
+    pointer _m_Pointer;
+};
+
+template<class _Ty>
+struct bidi_iterator : public fwd_iterator<_Ty>
+{
+    using iterator_category = _FCL::bidirectional_iterator_tag;
+
+    constexpr typename fwd_iterator<_Ty>::reference operator--() noexcept
+    {
+        _m_Pointer--;
+        return *_m_Pointer;
+    }
+
+private:
+    using fwd_iterator<_Ty>::_m_Pointer;
+};
+
+template<class _Ty>
+struct random_access_iterator : public bidi_iterator<_Ty>
+{
+    using iterator_category = _FCL::random_access_iterator_tag;
+    using typename fwd_iterator<_Ty>::value_type;
+    using typename fwd_iterator<_Ty>::reference;
+    using typename fwd_iterator<_Ty>::difference_type;
+
+    constexpr reference operator+=(difference_type rhs) noexcept
+    {
+        _m_Pointer += rhs;
+        return *_m_Pointer;
+    };
+
+    constexpr value_type operator+(difference_type rhs) noexcept
+    {
+        return this += rhs;
+    }
+
+    constexpr reference operator[](difference_type offset)
+    {
+        return *(this + offset);
+    }
+private:
+    using fwd_iterator<_Ty>::_m_Pointer;
+};
+
+template<class _Ty>
+struct fwd_iterator_const
+{
+    using iterator_category = std::forward_iterator_tag;
+    using value_type = const _Ty;
+    using difference_type = ptrdiff_t;
+    using pointer = _Ty*;
+    using reference = const _Ty&;
+
+    fwd_iterator_const(pointer counter)
+        : _m_Pointer(counter)
+    { }
+
+    fwd_iterator_const(fwd_iterator_const&&) = delete;
+    fwd_iterator_const(const fwd_iterator_const&) = delete; 
+
+    reference operator++() const noexcept
+    {
+        _m_Pointer++;
+        return *_m_Pointer;
+    }
+
+    reference operator--() const noexcept
+    {
+        _m_Pointer--;
+        return *_m_Pointer;
+    }
+
+    reference operator*() const noexcept
+    {
+        return *_m_Pointer;
+    }
+
+    reference operator->() const noexcept
+    {
+        return *_m_Pointer;
+    }
+
+    constexpr bool operator==(fwd_iterator_const& it) noexcept
+    {
+        return _m_Pointer == it._m_Pointer;
+    }
+
+    constexpr bool operator!=(fwd_iterator_const& it) noexcept
     {
         return !operator==(it);
     }

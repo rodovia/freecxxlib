@@ -1,126 +1,14 @@
 #pragma once
 
 #include "internals/btypes.h"
+#include "internals/basic_string_view.h"
 #include "initializer_list"
 #include "memory"
 #include "utility"
 #include "algorithm"
+#include <type_traits>
 
 _FCL_NAMESPACE_BEGIN
-
-template<class _Ty>
-struct char_traits
-{
-    static_assert(true, "No traits for non-char type");
-};
-
-template<>
-struct char_traits<char>
-{
-    using char_type = char;
-    using int_type = int;
-    /* off_type, pos_type, state_type and comparison_category are purposefully omitted */
-
-    static constexpr void assign(char_type& c1, const char_type& c2) noexcept
-    {
-        c1 = c2;
-    }
-
-    static constexpr bool eq(char_type c1, char_type c2) noexcept
-    {
-        return c1 == c2;
-    }
-
-    static constexpr bool lt(char_type c1, char_type c2) noexcept
-    {
-        return c1 < c2;
-    }
-
-    static constexpr int compare(const char_type* s1, const char_type* s2, size_t n)
-    {
-        for (size_t i = 0; i < n; i++)
-        {
-            char_type c = s1[i];
-            char_type c2 = s2[i];
-            if (lt(c, c2))
-            {
-                return -1;
-            }
-
-            if (lt(c2, c))
-            {
-                return 1;
-            }
-        }
-
-        return 0;
-    }
-
-    static constexpr size_t length(const char_type* string)
-    {
-        /* TODO: someday remove this const cast */
-        char_type* b = const_cast<char_type*>(string);
-        while(*b != 0) ++b;
-        return b - string;
-    }
-
-    static constexpr const char_type* find(const char_type* s, size_t n,
-                                           const char_type& a)
-    {
-        for (size_t i = 0; i < n; i++)
-        {
-            if (s[i] == a)
-            {
-                return &s[i];
-            }
-        }
-
-        return nullptr;
-    }
-
-    static constexpr char_type* move(char_type* s1, const char_type* s2, size_t n)
-    {
-        /* s1 comes first than s2: copy in reverse */
-        if (s2 > s1 && s1 + n >= s2)
-        {
-            for (size_t c = n; c != 0; c--)
-            {
-                s1[c] = s2[c];
-            }
-
-            return s1;
-        }
-
-        for (size_t c = 0; c < n; c++)
-        {
-            s1[c] = s2[c];
-        }
-
-        return s1;
-    }
-
-    static constexpr char_type* copy(char_type* s1, const char_type* s2, size_t n)
-    {
-        for (size_t c = 0; c < n; c++)
-        {
-            s1[c] = s2[c];
-        }
-
-        return s1;
-    }
-
-    static constexpr char_type* assign(char_type* s, size_t n, char_type a)
-    {
-        for (size_t i = 0; i < n; i++)
-        {
-            s[i] = a;
-        }
-
-        return s;
-    }
-
-    /* not_eof, to_char_type, to_int_type, eq_int_type and eof where purposefully omitted */
-};
 
 template<class _Cy, class _Try = char_traits<_Cy>, class _Aly = allocator<_Cy>>
 class basic_string
@@ -396,6 +284,16 @@ public:
     constexpr int compare(const _Cy* rhs) const
     {
         return this->compare(basic_string(rhs));
+    }
+
+    constexpr basic_string substr(size_type pos = 0, size_type n = npos) const
+    {
+        return basic_string(*this, pos, n);
+    }
+
+    constexpr basic_string substr(size_type pos = 0, size_type n = npos)
+    {
+        return basic_string(std::move(*this), pos, n);
     }
 
 private:

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "internals/btypes.h"
+#include "type_traits"
 
 _FCL_NAMESPACE_BEGIN
 
@@ -9,6 +10,12 @@ template<class _Ty> void swap(_Ty& item1, _Ty& item2) noexcept
     _Ty tmp = item2;
     item2 = item1;
     item1 = tmp;
+}
+
+template<class _Ty> 
+constexpr remove_reference_t<_Ty>&& move(_Ty&& t) noexcept
+{
+    return static_cast<remove_reference_t<_Ty>&&>(t);
 }
 
 _FCL_NAMESPACE_END

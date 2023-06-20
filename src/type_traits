@@ -1,6 +1,7 @@
 #pragma once
 
 #include "internals/btypes.h"
+#include "internals/declval.h"
 
 #define __integral_const(T)                                 \
     template<> struct is_integral<signed T> : true_type {};  \
@@ -13,6 +14,12 @@
     template<> struct is_floating_point<const T> : true_type {};
 
 _FCL_NAMESPACE_BEGIN
+
+template<class _Fromy, class _Toy>
+struct __convert_t
+{
+    using converted = decltype(static_cast<_Toy>(declval<_Fromy>()));
+};
 
 template<class _Ty, _Ty _Valuey> struct integral_constant
 {
@@ -165,6 +172,39 @@ struct is_class : false_type
 template<>
 struct is_class<class _Ty> : true_type 
 {};
+
+template<class _T1y, class _T2y>
+struct is_same : false_type
+{};
+
+template<class _T1y>
+struct is_same<_T1y, _T1y> : true_type
+{};
+
+template<class _Fromy, class _Toy>
+struct is_convertible : is_same<typename __convert_t<_Fromy, _Toy>::converted, _Toy>
+{};
+
+template<class _Ty>
+struct remove_reference
+{
+    using type = _Ty;
+};
+
+template<class _Ty>
+struct remove_reference<_Ty&>
+{
+    using type = _Ty;
+};
+
+template<class _Ty>
+struct remove_reference<_Ty&&>
+{
+    using type = _Ty;
+};
+
+template<class _Ty>
+using remove_reference_t = typename remove_reference<_Ty>::type;
 
 _FCL_NAMESPACE_END
 

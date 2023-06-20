@@ -6,8 +6,10 @@
 
 #ifdef _FCL_ANOTHER_NAMESPACE
 #define _FCL_NAMESPACE_BEGIN namespace fcl {
+#deifne _FCL fcl
 #else
 #define _FCL_NAMESPACE_BEGIN namespace std {
+#define _FCL std
 #endif
 
 #define _FCL_NAMESPACE_END }

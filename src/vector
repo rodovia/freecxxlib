@@ -18,6 +18,7 @@ public:
     using reference = _Ty&;
     using const_reference = const _Ty&;
     using iterator = __fcl::fwd_iterator<_Ty>;
+    using const_iterator = const __fcl::fwd_iterator_const<_Ty>;
     using difference_type = typename __fcl::iterator_traits<iterator>::difference_type;
     using size_type = typename __fcl::iterator_traits<iterator>::difference_type;
 
@@ -29,7 +30,10 @@ public:
     }
 
     constexpr vector(initializer_list<_Ty> il, const _Aly& al = _Aly())
-        : _m_Buffer(il.begin())
+        : _m_Buffer(il.begin()),
+        _m_Allocator(al),
+        _m_Length(il.size()),
+        _m_Capacity(il.size())
     {
     }
 
@@ -43,11 +47,11 @@ public:
     
     constexpr explicit vector(size_type n, const _Aly& a = _Aly())
         : _m_Allocator(a),
-          _m_Length(0),
-          _m_Capacity(0),
+          _m_Length(n),
+          _m_Capacity(n),
           _m_Buffer(nullptr)
     {
-        _m_Buffer = _m_Allocator.allocate(_m_Capacity);
+        _m_Buffer = _m_Allocator.allocate(n);
     }
 
     constexpr vector(size_type size, const _Ty& value, const _Aly& al = _Aly())
@@ -95,6 +99,16 @@ public:
     constexpr iterator end() noexcept
     {
         return iterator(_m_Buffer + _m_Length);
+    }
+
+    constexpr const_iterator cbegin() const noexcept
+    {
+        return const_iterator(_m_Buffer);
+    }
+
+    constexpr const_iterator cend() const noexcept
+    {
+        return const_iterator(_m_Buffer + _m_Length);
     }
 
     [[nodiscard]] constexpr bool empty() const noexcept
@@ -176,6 +190,16 @@ public:
     constexpr const_reference operator[](size_type index) const
     {
         return _m_Buffer[index];
+    }
+
+    constexpr reference at(size_type index) 
+    {
+        return operator[](index);
+    }
+
+    constexpr const_reference at(size_type index) const
+    {
+        return operator[](index);
     }
 
     constexpr reference front()
