@@ -86,9 +86,6 @@ struct fwd_iterator
         : _m_Pointer(counter)
     { }
 
-    fwd_iterator(fwd_iterator&&) = delete;
-    fwd_iterator(const fwd_iterator&) = delete; 
-
     reference operator++() noexcept
     {
         _m_Pointer++;

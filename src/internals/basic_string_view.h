@@ -1,12 +1,12 @@
 #pragma once
 
 #include "btypes.h"
-#include "internals/string.h"
+#include "string.h"
 #include "iterator.h"
-#include <algorithm>
+#include "../algorithm"
 #include <cstddef>
-#include <memory>
-#include <utility>
+#include "../memory"
+#include "../utility"
 
 _FCL_NAMESPACE_BEGIN
 
@@ -259,29 +259,6 @@ public:
             return 0;
         else if (_m_Length > string._m_Length)
             return 1;
-    }
-    
-    constexpr size_type find(basic_string_view vw, size_type pos = 0)
-    {
-        if (pos == 0)
-        {
-            int res = traits_type::compare(vw._m_Buffer, _m_Buffer, _m_Length);
-            if (res == 0)
-            {
-                return 0;
-            }
-        }
-
-        for (long x = pos; x < _m_Length; x++)
-        {
-            if (_m_Buffer[x] == vw._m_Buffer[x]
-                && !__fcl::generic_strncmp(&_m_Buffer[x], &vw._m_Buffer[x]))
-            {
-                return x;
-            }
-        }
-
-        return npos;
     }
 
 private:
