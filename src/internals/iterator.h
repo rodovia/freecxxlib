@@ -3,6 +3,8 @@
 #include "btypes.h"
 #include <stddef.h>
 
+#define __fclmin(X, y) ((X > y) ? y : X) 
+
 _FCL_NAMESPACE_BEGIN
 
 struct input_iterator_tag 
@@ -82,7 +84,7 @@ struct fwd_iterator
     using pointer = _Ty*;
     using reference = _Ty&;
 
-    fwd_iterator(pointer counter)
+    fwd_iterator(const pointer counter)
         : _m_Pointer(counter)
     { }
 
@@ -92,12 +94,12 @@ struct fwd_iterator
         return *_m_Pointer;
     }
 
-    reference operator*() noexcept
+    const _Ty& operator*() noexcept
     {
         return *_m_Pointer;
     }
 
-    reference operator->() noexcept
+    const _Ty& operator->() noexcept
     {
         return *_m_Pointer;
     }
@@ -112,6 +114,18 @@ struct fwd_iterator
         return !operator==(it);
     }
 
+    constexpr difference_type operator-(difference_type rhs)
+    {
+        return _m_Pointer - rhs;
+    }
+
+    constexpr difference_type operator-(fwd_iterator<_Ty>& rhs)
+    {
+        return __fclmin(_m_Pointer, rhs._m_Pointer) 
+                ? rhs._m_Pointer - _m_Pointer 
+                : _m_Pointer - rhs._m_Pointer;
+    }
+
 protected:
     pointer _m_Pointer;
 };
@@ -120,6 +134,7 @@ template<class _Ty>
 struct bidi_iterator : public fwd_iterator<_Ty>
 {
     using iterator_category = _FCL::bidirectional_iterator_tag;
+    using fwd_iterator<_Ty>::fwd_iterator;
 
     constexpr typename fwd_iterator<_Ty>::reference operator--() noexcept
     {
@@ -134,6 +149,7 @@ private:
 template<class _Ty>
 struct random_access_iterator : public bidi_iterator<_Ty>
 {
+    using bidi_iterator<_Ty>::bidi_iterator;
     using iterator_category = _FCL::random_access_iterator_tag;
     using typename fwd_iterator<_Ty>::value_type;
     using typename fwd_iterator<_Ty>::reference;
@@ -141,13 +157,13 @@ struct random_access_iterator : public bidi_iterator<_Ty>
 
     constexpr reference operator+=(difference_type rhs) noexcept
     {
-        _m_Pointer += rhs;
+        const_cast<_Ty*>(_m_Pointer) += rhs;
         return *_m_Pointer;
     };
 
-    constexpr value_type operator+(difference_type rhs) noexcept
+    constexpr reference operator+(difference_type rhs) noexcept
     {
-        return this += rhs;
+        return *(_m_Pointer + rhs);
     }
 
     constexpr reference operator[](difference_type offset)
@@ -156,6 +172,24 @@ struct random_access_iterator : public bidi_iterator<_Ty>
     }
 private:
     using fwd_iterator<_Ty>::_m_Pointer;
+};
+
+template<class _Ty, class _Iter>
+struct output_iterator : public _Iter
+{
+    using iterator_category = _FCL::output_iterator_tag;
+
+    constexpr typename iterator_traits<_Iter>::reference operator*() noexcept
+    {
+        return *const_cast<_Ty*>(this->_m_Pointer);
+    }
+
+    constexpr typename iterator_traits<_Iter>::reference operator->() noexcept
+    {
+        return *const_cast<_Ty*>(this->_m_Pointer);
+    }
+protected:
+    using typename _Iter::_m_Pointer;
 };
 
 template<class _Ty>
@@ -211,3 +245,9 @@ private:
 };
 
 }
+
+_FCL_NAMESPACE_BEGIN
+
+using ::__fcl::iterator_traits;
+
+_FCL_NAMESPACE_END

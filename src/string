@@ -2,7 +2,9 @@
 
 #include "internals/btypes.h"
 #include "internals/basic_string_view.h"
+#include "internals/memcpy.h"
 #include "initializer_list"
+#include "internals/iterator.h"
 #include "memory"
 #include "utility"
 #include "algorithm"
@@ -20,6 +22,8 @@ public:
     using size_type = typename _Aly::size_type; /* NONCOMPLIANT */
     using reference = _Cy&;
     using const_reference = const _Cy&;
+    using iterator = __fcl::fwd_iterator<_Cy>;
+    using const_iterator = __fcl::fwd_iterator_const<_Cy>;
 
     static constexpr size_type npos = size_type(-1);
 
@@ -28,6 +32,46 @@ public:
     constexpr basic_string() noexcept(noexcept(_Aly())) 
         : basic_string(_Aly())
     {
+    }
+
+    constexpr basic_string(const basic_string& str, size_type pos,
+                            _Aly& a = _Aly())
+        : _m_Length(str.size() - pos),
+          _m_Capacity(_m_Length),
+          _m_Allocator(a)
+    {
+        _Cy* buffer = _m_Allocator.allocate(_m_Capacity);
+        _Try::move(buffer, str._m_Buffer + pos, _m_Length);
+        std::swap(_m_Buffer, buffer);
+    }
+
+    constexpr basic_string(basic_string&& str, size_type pos,
+                            _Aly& a = _Aly())
+    {
+        this->swap(str);
+        _m_Allocator = a;
+        if (_m_Capacity == _m_Length)
+        {
+            _m_Capacity -= pos;
+        }
+
+        _m_Buffer += pos;
+        _m_Length -= pos;
+    }
+
+    constexpr basic_string(basic_string&& str, size_type pos,
+                            size_type n, const _Aly& a = _Aly())
+    {
+        size_type __rlen = min(n, str._m_Length - pos);
+        this->swap(str);
+        if (_m_Capacity == _m_Length)
+        {
+            _m_Capacity -= __rlen;
+        }
+
+        _m_Allocator = a;
+        _m_Buffer += __rlen;
+        _m_Length -= __rlen;
     }
 
     constexpr explicit basic_string(const _Aly& a) noexcept
@@ -74,6 +118,17 @@ public:
         _Cy* buffer = _m_Allocator.allocate(_m_Capacity);
         _Try::move(buffer, str, _m_Capacity);
         _m_Buffer = buffer;
+    }
+
+    template<class _Inpy>
+    constexpr basic_string(_Inpy begin, _Inpy end, const _Aly& a = _Aly())
+        : _m_Allocator(a)
+    {
+        size_t __di = distance(begin, end);
+        _m_Length = __di;
+        _m_Capacity = __di;
+        _m_Buffer = _m_Allocator.allocate(_m_Capacity);
+        copy(begin, end, iterator(_m_Buffer));
     }
 
     ~basic_string()
@@ -296,6 +351,14 @@ public:
         return basic_string(std::move(*this), pos, n);
     }
 
+    constexpr void swap(basic_string& str)
+    {
+        std::swap(_m_Buffer, str._m_Buffer);
+        std::swap(_m_Length, str._m_Length);
+        std::swap(_m_Capacity, str._m_Capacity);
+        std::swap(_m_Allocator, str._m_Allocator);
+    }
+
 private:
     constexpr void resize_buffers(size_type newsize)
     {
@@ -327,6 +390,13 @@ constexpr bool operator==(std::basic_string<_Cy, _Try, _Aly> lhs,
                             const _Cy* rhs)
 {
     return lhs.compare(rhs) == 0;
+}
+
+template<class _Cy, class _Try, class _Aly>
+constexpr void swap(std::basic_string<_Cy, _Try, _Aly>& lhs,
+                    std::basic_string<_Cy, _Try, _Aly>& rhs) noexcept
+{
+    lhs.swap(rhs);
 }
 
 using string = basic_string<char>;

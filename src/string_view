@@ -1,0 +1,37 @@
+#pragma once
+
+#include "internals/btypes.h"
+#include "internals/basic_string_view.h"
+#include "type_traits"
+
+_FCL_NAMESPACE_BEGIN
+
+template<class _Cy, class _Try>
+constexpr bool operator==(const _Cy* lhs, 
+                    basic_string_view<_Cy, _Try> rhs) noexcept
+{
+    return rhs.compare(basic_string_view<_Cy, _Try>(lhs));
+}
+
+template<class _Cy, class _Try>
+constexpr bool operator==(const _Cy* lhs, 
+                    type_identity_t<basic_string_view<_Cy, _Try>> rhs) noexcept
+{
+    return rhs.compare(basic_string_view<_Cy, _Try>(lhs));
+}
+
+template<class _Cy, class _Try>
+constexpr bool operator==(basic_string_view<_Cy, _Try> lhs,
+                          const _Cy* rhs) noexcept
+{
+    return lhs.compare(basic_string_view<_Cy, _Try>(rhs));
+}
+
+template<class _Cy, class _Try>
+constexpr bool operator==(type_identity_t<basic_string_view<_Cy, _Try>> lhs, 
+                          const _Cy* rhs) noexcept
+{
+    return lhs.compare(basic_string_view<_Cy, _Try>(rhs));
+}
+
+_FCL_NAMESPACE_END

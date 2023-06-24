@@ -153,6 +153,8 @@ public:
     {
     }
 
+    
+
     constexpr basic_string_view(const_pointer string, size_type length)
         : _m_Buffer(string),
         _m_Length(length)
@@ -164,7 +166,7 @@ public:
     constexpr basic_string_view(const basic_string_view&) noexcept = default;
     constexpr basic_string_view& operator=(const basic_string_view&) noexcept = default;
 
-    constexpr const_iterator begin() const noexcept
+    constexpr const_iterator begin() noexcept
     {
         return const_iterator(_m_Buffer);
     }
@@ -174,7 +176,7 @@ public:
         return const_iterator(_m_Buffer);
     }
 
-    constexpr const_iterator end() const noexcept
+    constexpr const_iterator end() noexcept
     {
         return const_iterator(_m_Buffer + _m_Length);
     }
@@ -259,6 +261,12 @@ public:
             return 0;
         else if (_m_Length > string._m_Length)
             return 1;
+        return 0;
+    }
+
+    [[nodiscard]] constexpr bool empty() const noexcept
+    {
+        return _m_Length != 0;
     }
 
 private:

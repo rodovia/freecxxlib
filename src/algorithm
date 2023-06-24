@@ -1,6 +1,8 @@
 #pragma once
 
 #include "internals/btypes.h"
+#include "internals/iterator.h"
+#include <type_traits>
 
 _FCL_NAMESPACE_BEGIN
 
@@ -42,6 +44,39 @@ constexpr _Itery find_if(_Itery first, _Itery last, _Predy predicate)
     }
 
     return last;
+}
+
+template<class _Inpy, class _Outery>
+constexpr _Outery copy(_Inpy begin, _Inpy end, _Outery result)
+{
+    size_t __distance = end - begin;
+    for (size_t x = 0; x < __distance; x++)
+    {
+        result[x] = begin[x];
+    }
+
+    return result + __distance;
+}
+
+/* SHOULD BE IN iterator HEADER */
+template<class _Inpy> 
+constexpr typename iterator_traits<_Inpy>::difference_type
+distance(_Inpy begin, _Inpy end)
+{
+    using _Try = iterator_traits<_Inpy>;
+    if constexpr (std::is_same<typename _Try::iterator_category, 
+                                random_access_iterator_tag>())
+    {
+        return (end - begin);
+    }
+
+    typename _Try::difference_type __di;
+    while (begin != end)
+    {
+        ++__di; ++begin;
+    }
+
+    return __di;
 }
 
 _FCL_NAMESPACE_END
