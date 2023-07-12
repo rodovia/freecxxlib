@@ -184,6 +184,9 @@ template<class _T1y>
 struct is_same<_T1y, _T1y> : true_type
 {};
 
+template<class _T1y, class _T2y>
+inline constexpr bool is_same_v = is_same<_T1y, _T2y>::value;
+
 template<class _Fromy, class _Toy>
 struct is_convertible : is_same<typename __convert_t<_Fromy, _Toy>::converted, _Toy>
 {};

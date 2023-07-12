@@ -104,12 +104,22 @@ struct fwd_iterator
         return *_m_Pointer;
     }
 
-    constexpr bool operator==(fwd_iterator& it) noexcept
+    constexpr bool operator==(const fwd_iterator& it) noexcept
     {
         return _m_Pointer == it._m_Pointer;
     }
 
-    constexpr bool operator!=(fwd_iterator& it) noexcept
+    constexpr bool operator==(fwd_iterator&& it) noexcept
+    {
+        return _m_Pointer == it._m_Pointer;
+    }
+
+    constexpr bool operator!=(const fwd_iterator& it) noexcept
+    {
+        return !operator==(it);
+    }
+
+    constexpr bool operator!=(fwd_iterator&& it) noexcept
     {
         return !operator==(it);
     }
@@ -124,6 +134,11 @@ struct fwd_iterator
         return __fclmin(_m_Pointer, rhs._m_Pointer) 
                 ? rhs._m_Pointer - _m_Pointer 
                 : _m_Pointer - rhs._m_Pointer;
+    }
+
+    constexpr pointer operator+(size_t offset)
+    {
+        return _m_Pointer + offset;
     }
 
 protected:
