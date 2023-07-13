@@ -220,7 +220,7 @@ struct fwd_iterator_const
         : _m_Pointer(counter)
     { }
 
-    reference operator++() const noexcept
+    reference operator++() noexcept
     {
         _m_Pointer++;
         return *_m_Pointer;
