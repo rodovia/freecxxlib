@@ -226,7 +226,7 @@ struct fwd_iterator_const
         return *_m_Pointer;
     }
 
-    reference operator--() const noexcept
+    reference operator--() noexcept
     {
         _m_Pointer--;
         return *_m_Pointer;
