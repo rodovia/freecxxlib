@@ -220,9 +220,6 @@ struct fwd_iterator_const
         : _m_Pointer(counter)
     { }
 
-    fwd_iterator_const(fwd_iterator_const&&) = delete;
-    fwd_iterator_const(const fwd_iterator_const&) = delete; 
-
     reference operator++() const noexcept
     {
         _m_Pointer++;
@@ -245,7 +242,7 @@ struct fwd_iterator_const
         return *_m_Pointer;
     }
 
-    constexpr bool operator==(fwd_iterator_const& it) noexcept
+    constexpr bool operator==(const fwd_iterator_const& it) noexcept
     {
         return _m_Pointer == it._m_Pointer;
     }
@@ -255,6 +252,10 @@ struct fwd_iterator_const
         return !operator==(it);
     }
 
+    constexpr pointer operator+(size_t offset) noexcept
+    {
+        return _m_Pointer + offset;
+    }
 private:
     pointer _m_Pointer;
 };
