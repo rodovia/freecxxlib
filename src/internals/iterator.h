@@ -94,12 +94,12 @@ struct fwd_iterator
         return *_m_Pointer;
     }
 
-    const _Ty& operator*() noexcept
+    _Ty& operator*() noexcept
     {
         return *_m_Pointer;
     }
 
-    const _Ty& operator->() noexcept
+    _Ty& operator->() noexcept
     {
         return *_m_Pointer;
     }
