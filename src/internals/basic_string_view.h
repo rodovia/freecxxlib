@@ -153,8 +153,6 @@ public:
     {
     }
 
-    
-
     constexpr basic_string_view(const_pointer string, size_type length)
         : _m_Buffer(string),
         _m_Length(length)
@@ -266,7 +264,7 @@ public:
 
     [[nodiscard]] constexpr bool empty() const noexcept
     {
-        return _m_Length != 0;
+        return _m_Length == 0;
     }
 
 private:
