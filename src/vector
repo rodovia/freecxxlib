@@ -47,7 +47,7 @@ public:
     
     constexpr explicit vector(size_type n, const _Aly& a = _Aly())
         : _m_Allocator(a),
-          _m_Length(n),
+          _m_Length(0),
           _m_Capacity(n),
           _m_Buffer(nullptr)
     {
