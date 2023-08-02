@@ -116,7 +116,7 @@ template<class _Ty>
 struct is_array<_Ty[]> : true_type
 {};
 
-template<class _Ty, std::size_t _Sizey>
+template<class _Ty, _FCL::size_t _Sizey>
 struct is_array<_Ty[_Sizey]> : true_type
 {};
 

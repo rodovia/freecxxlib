@@ -43,7 +43,7 @@ struct iterator_traits
 template<class _Ty>
 struct input_iterator
 {
-    using iterator_category = std::input_iterator_tag;
+    using iterator_category = _FCL::input_iterator_tag;
     using value_type = _Ty;
     using difference_type = ptrdiff_t;
     using pointer = _Ty*;
@@ -78,7 +78,7 @@ private:
 template<class _Ty>
 struct fwd_iterator
 {
-    using iterator_category = std::forward_iterator_tag;
+    using iterator_category = _FCL::forward_iterator_tag;
     using value_type = _Ty;
     using difference_type = ptrdiff_t;
     using pointer = _Ty*;
@@ -210,7 +210,7 @@ protected:
 template<class _Ty>
 struct fwd_iterator_const
 {
-    using iterator_category = std::forward_iterator_tag;
+    using iterator_category = _FCL::forward_iterator_tag;
     using value_type = const _Ty;
     using difference_type = ptrdiff_t;
     using pointer = _Ty*;

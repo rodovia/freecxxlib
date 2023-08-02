@@ -75,10 +75,10 @@ public:
 
     constexpr vector(vector&& vec) noexcept
     {
-        std::swap(_m_Buffer, vec._m_Buffer);
-        std::swap(_m_Allocator, vec._m_Allocator);
-        std::swap(_m_Capacity, vec._m_Capacity);
-        std::swap(_m_Length, vec._m_Length);
+        _FCL::swap(_m_Buffer, vec._m_Buffer);
+        _FCL::swap(_m_Allocator, vec._m_Allocator);
+        _FCL::swap(_m_Capacity, vec._m_Capacity);
+        _FCL::swap(_m_Length, vec._m_Length);
     }
 
     constexpr _Aly get_allocator()
@@ -128,10 +128,10 @@ public:
 
     constexpr void swap(vector& other)
     {
-        std::swap(_m_Allocator, other._m_Allocator);
-        std::swap(_m_Length, other._m_Length);
-        std::swap(_m_Capacity, other._m_Capacity);
-        std::swap(_m_Buffer, other._m_Buffer);
+        _FCL::swap(_m_Allocator, other._m_Allocator);
+        _FCL::swap(_m_Length, other._m_Length);
+        _FCL::swap(_m_Capacity, other._m_Capacity);
+        _FCL::swap(_m_Buffer, other._m_Buffer);
     }
 
     constexpr void reserve(size_type size)
@@ -225,9 +225,8 @@ public:
 private:
     constexpr void resize_buffers(size_type nsize)
     {
-        Warn("m_Buffer=%p (before swap)\n", _m_Buffer);
         _Ty* buffer = _m_Allocator.allocate(nsize);
-        std::swap(buffer, _m_Buffer);
+        _FCL::swap(buffer, _m_Buffer);
         _m_Capacity = nsize;
         
         if (buffer != nullptr)
