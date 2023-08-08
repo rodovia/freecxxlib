@@ -230,13 +230,14 @@ public:
 private:
     constexpr void resize_buffers(size_type nsize)
     {
+        auto oldcap = _m_Capacity;
         _Ty* buffer = _m_Allocator.allocate(nsize);
         _FCL::swap(buffer, _m_Buffer);
         _m_Capacity = nsize;
         
         if (buffer != nullptr)
         {
-            __fcl::generic_memcpy(_m_Buffer, buffer, nsize);
+            __fcl::generic_memcpy(_m_Buffer, buffer, oldcap);
             _m_Allocator.deallocate(buffer, _m_Capacity);
         }
     }
