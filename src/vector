@@ -222,6 +222,11 @@ public:
         return _m_Buffer[_m_Length];
     }
 
+    constexpr void pop_back()
+    {
+        _m_Length--;
+    }
+
 private:
     constexpr void resize_buffers(size_type nsize)
     {
