@@ -215,6 +215,41 @@ struct type_identity
     using type = _Ty;
 };
 
+template<bool _By, class _Ty = void>
+struct enable_if
+{};
+
+template<class _Ty>
+struct enable_if<true, _Ty>
+{
+    using type = _Ty;
+};
+
+template<class _Ty>
+struct enable_if<false, _Ty>
+{};
+
+
+template<bool _By, class _Ty = void>
+using enable_if_t = typename enable_if<_By, _Ty>::type;
+
+template<class _Ty>
+struct is_scalar : bool_constant<std::is_nullptr_t<_Ty>::value ||
+                                 std::is_integral<_Ty>::value ||
+                                 std::is_floating_point<_Ty>::value ||
+                                 // std::is_pointer<_Ty>::value ||
+                                 std::is_member_function_pointer<_Ty>::value>
+{};
+
+template<class _Ty>
+struct is_object : bool_constant<std::is_array<_Ty>::value ||
+                                 std::is_class<_Ty>::value ||
+                                 std::is_scalar<_Ty>::value>
+{};                            
+
+template<class _Ty>
+inline constexpr bool is_object_v = is_object<_Ty>();
+
 template<class _Ty>
 using remove_reference_t = typename remove_reference<_Ty>::type;
 

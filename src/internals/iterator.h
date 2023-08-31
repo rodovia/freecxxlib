@@ -1,6 +1,8 @@
 #pragma once
 
 #include "btypes.h"
+#include "../type_traits"
+#include "../algorithm"
 #include <stddef.h>
 
 #define __fclmin(X, y) ((X > y) ? y : X) 
@@ -88,18 +90,18 @@ struct fwd_iterator
         : _m_Pointer(counter)
     { }
 
-    reference operator++() noexcept
+    constexpr reference operator++() noexcept
     {
         _m_Pointer++;
         return *_m_Pointer;
     }
 
-    _Ty& operator*() noexcept
+    constexpr _Ty& operator*() noexcept
     {
         return *_m_Pointer;
     }
 
-    _Ty& operator->() noexcept
+    constexpr _Ty& operator->() noexcept
     {
         return *_m_Pointer;
     }
@@ -196,12 +198,12 @@ struct output_iterator : public _Iter
 
     constexpr typename iterator_traits<_Iter>::reference operator*() noexcept
     {
-        return *const_cast<_Ty*>(this->_m_Pointer);
+        return *const_cast<_Ty*>(_Iter::_m_Pointer);
     }
 
     constexpr typename iterator_traits<_Iter>::reference operator->() noexcept
     {
-        return *const_cast<_Ty*>(this->_m_Pointer);
+        return *const_cast<_Ty*>(_Iter::_m_Pointer);
     }
 protected:
     using typename _Iter::_m_Pointer;
@@ -265,5 +267,67 @@ private:
 _FCL_NAMESPACE_BEGIN
 
 using ::__fcl::iterator_traits;
+
+template<class _Inpy> 
+constexpr typename iterator_traits<_Inpy>::difference_type
+distance(_Inpy begin, _Inpy end)
+{
+    using _Try = iterator_traits<_Inpy>;
+    if constexpr (std::is_same<typename _Try::iterator_category, 
+                                random_access_iterator_tag>())
+    {
+        return (end - begin);
+    }
+
+    typename _Try::difference_type __di = 0;
+    while (begin != end)
+    {
+        ++__di; ++begin;
+    }
+
+    return __di;
+}
+
+template<class _Fitery, class _Ty>
+constexpr _Fitery remove(_Fitery _begin, _Fitery _end, const _Ty& _value)
+{
+    auto __iter = find(_begin, _end, _value);
+    if (__iter == _end)
+    {
+        return _begin;
+    }
+
+    for (_Fitery __i = _begin; ++__i != *_end;)
+    {
+        if (!(*__i != _value))
+        {
+            /* For some reason, clang rejects `*(begin++)`.
+               We have to use this FCL-specific behaviour. */
+            *(_begin + 1) = move(*__i);
+        }
+    }
+
+    return _begin;
+}
+
+template<class _Fitery, class _Predy>
+constexpr _Fitery remove_if(_Fitery _begin, _Fitery _end, _Predy _predicate)
+{
+    auto __iter = find_if(_begin, _end, _predicate);
+    if (__iter == _end)
+    {
+        return _begin;
+    }
+
+    for (_Fitery __i = _begin; ++__i != *_end;)
+    {
+        if (!_predicate(*__i))
+        {
+            *(_begin + 1) = move(*__i);
+        }
+    }
+
+    return _begin;
+}
 
 _FCL_NAMESPACE_END

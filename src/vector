@@ -1,12 +1,14 @@
 #pragma once
 
+#include "internals/ctordtor.h"
 #include "utility"
 #include "memory"
-#include "initializer_list"
+#include <initializer_list>
 #include "stdint.h"
 #include "internals/memcpy.h"
 #include "internals/iterator.h"
 #include "internals/btypes.h"
+#include <type_traits>
 
 _FCL_NAMESPACE_BEGIN
 
@@ -51,7 +53,7 @@ public:
           _m_Capacity(n),
           _m_Buffer(nullptr)
     {
-        _m_Buffer = _m_Allocator.allocate(n);
+        _m_Buffer = this->allocate(n);
     }
 
     constexpr vector(size_type size, const _Ty& value, const _Aly& al = _Aly())
@@ -60,7 +62,7 @@ public:
           _m_Capacity(size),
           _m_Buffer(nullptr)
     {
-        _m_Buffer = _m_Allocator.allocate(_m_Capacity);
+        _m_Buffer = this->allocate(_m_Capacity);
         __fcl::generic_memset(_m_Buffer, value, _m_Capacity);
     }
 
@@ -69,7 +71,7 @@ public:
           _m_Length(vec._m_Length),
           _m_Capacity(vec._m_Capacity)
     {
-        _m_Buffer = _m_Allocator.allocate(_m_Capacity);
+        _m_Buffer = this->allocate(_m_Capacity);
         __fcl::generic_memcpy(_m_Buffer, vec._m_Buffer, _m_Length);
     }
 
@@ -88,7 +90,7 @@ public:
 
     ~vector()
     {
-        _m_Allocator.deallocate(_m_Buffer, _m_Capacity);
+        _m_Allocator.deallocate(_m_Buffer, _m_Capacity + 1);
     }
 
     constexpr iterator begin() noexcept
@@ -164,7 +166,7 @@ public:
     {
         if (_m_Length >= _m_Capacity)
         {
-            this->resize_buffers(_m_Capacity + 3);
+            this->resize_buffers(_m_Capacity + 4);
         }
 
         _m_Buffer[_m_Length] = d;
@@ -175,7 +177,7 @@ public:
     {
         if (_m_Length >= _m_Capacity)
         {
-            this->resize_buffers(_m_Capacity + 3);
+            this->resize_buffers(_m_Capacity + 4);
         }
 
         _m_Buffer[_m_Length] = d;
@@ -224,22 +226,42 @@ public:
 
     constexpr void pop_back()
     {
+        if constexpr (_FCL::is_object_v<_Ty>)
+        {
+            __fcl::destroy_one(&_m_Buffer[_m_Length]);
+        }
+
         _m_Length--;
+    }
+
+    constexpr void erase(iterator first, iterator last)
+    {
+        __fcl::destroy_many(first, last);
+    }
+
+    constexpr void erase(iterator item)
+    {
+        __fcl::destroy_one(_FCL::addressof(item));
     }
 
 private:
     constexpr void resize_buffers(size_type nsize)
     {
         auto oldcap = _m_Capacity;
-        _Ty* buffer = _m_Allocator.allocate(nsize);
+        _Ty* buffer = this->allocate(nsize);
         _FCL::swap(buffer, _m_Buffer);
         _m_Capacity = nsize;
         
         if (buffer != nullptr)
         {
             __fcl::generic_memcpy(_m_Buffer, buffer, oldcap);
-            _m_Allocator.deallocate(buffer, _m_Capacity);
+            _m_Allocator.deallocate(buffer, _m_Capacity + 1);
         }
+    }
+
+    constexpr _Ty* allocate(size_type size)
+    {
+        return _m_Allocator.allocate(size);
     }
 
     _Aly _m_Allocator;
@@ -252,6 +274,26 @@ template<class _Ty>
 constexpr void swap(vector<_Ty>& lhs, vector<_Ty&> rhs) noexcept
 {
     lhs.swap(rhs);
+}
+
+template<class _Ty, class _Aly>
+constexpr typename vector<_Ty, _Aly>::difference_type 
+erase(vector<_Ty, _Aly>& _erased, const _Ty& _value)
+{
+    auto __iter = remove(_erased.begin(), _erased.end(), _value);
+    auto __distance = distance(__iter, _erased.end());
+    _erased.erase(__iter, _erased.end());
+    return __distance;
+}
+
+template<class _Ty, class _Aly, class _Predy>
+constexpr typename vector<_Ty, _Aly>::difference_type 
+erase_if(vector<_Ty, _Aly>& _erased, _Predy _predicate)
+{
+    auto __iter = remove_if(_erased.begin(), _erased.end(), _predicate);
+    auto __distance = distance(__iter, _erased.end());
+    _erased.erase(__iter, _erased.end());
+    return __distance;
 }
 
 _FCL_NAMESPACE_END

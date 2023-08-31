@@ -2,6 +2,12 @@
 
 #include "internals/btypes.h"
 
+#ifdef __GNUG__
+#include_next <initializer_list>
+#else
+
+/* I don't know how to define this class properly. */
+
 _FCL_NAMESPACE_BEGIN
 
 template<class _Ty>
@@ -9,7 +15,7 @@ class initializer_list
 {
 private:
     size_t _m_Length;
-    const _Ty* _m_Begin;
+    iterator _m_Begin;
 public:
     using value_type = _Ty;
     using reference = const _Ty&;
@@ -19,7 +25,7 @@ public:
     using iterator = const _Ty*;
     using const_iterator = const _Ty*;
 
-    constexpr initializer_list()
+    constexpr initializer_list() noexcept
         : _m_Length(0),
         _m_Begin(nullptr)
     {}
@@ -53,3 +59,5 @@ constexpr const _Ty* end(initializer_list<_Ty> init) noexcept
 }
 
 _FCL_NAMESPACE_END
+
+#endif
