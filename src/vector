@@ -5,6 +5,7 @@
 #include "memory"
 #include <initializer_list>
 #include "stdint.h"
+
 #include "internals/memcpy.h"
 #include "internals/iterator.h"
 #include "internals/btypes.h"
@@ -179,8 +180,8 @@ public:
         {
             this->resize_buffers(_m_Capacity + 4);
         }
-
-        _m_Buffer[_m_Length] = d;
+        
+        _m_Buffer[_m_Length] = move(d);
         _m_Length++;
     }
 
@@ -255,7 +256,7 @@ private:
         if (buffer != nullptr)
         {
             __fcl::generic_memcpy(_m_Buffer, buffer, oldcap);
-            _m_Allocator.deallocate(buffer, _m_Capacity + 1);
+            _m_Allocator.deallocate(buffer, _m_Capacity);
         }
     }
 
