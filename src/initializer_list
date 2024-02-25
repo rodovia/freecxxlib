@@ -2,7 +2,7 @@
 
 #include "internals/btypes.h"
 
-#ifdef __GNUG__
+#if defined(__GNUG__) && __has_include(<initializer_list>)
 #include_next <initializer_list>
 #else
 

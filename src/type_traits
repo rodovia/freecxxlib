@@ -13,6 +13,26 @@
     template<> struct is_floating_point<T> : true_type {};  \
     template<> struct is_floating_point<const T> : true_type {};
 
+namespace __fcl
+{
+
+template<class _Ty>
+struct remove_const
+{
+    using type = _Ty;
+};
+
+template<class _Ty>
+struct remove_const<const _Ty>
+{
+    using type = _Ty;
+};
+
+template<class _Ty>
+using remove_const_t = typename remove_const<_Ty>::type;
+
+}
+
 _FCL_NAMESPACE_BEGIN
 
 template<class _Fromy, class _Toy>
@@ -243,8 +263,8 @@ struct is_scalar : bool_constant<std::is_nullptr_t<_Ty>::value ||
 
 template<class _Ty>
 struct is_object : bool_constant<std::is_array<_Ty>::value ||
-                                 std::is_class<_Ty>::value ||
-                                 std::is_scalar<_Ty>::value>
+                                 std::is_class<_Ty>::value /*||
+                                 std::is_scalar<_Ty>::value*/>
 {};                            
 
 template<class _Ty>

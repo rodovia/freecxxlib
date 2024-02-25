@@ -2,10 +2,11 @@
 
 #include "btypes.h"
 #include "../type_traits"
-#include "../algorithm"
 #include <stddef.h>
 
+#define __fclmax(X, y) ((X > y) ? X : y)
 #define __fclmin(X, y) ((X > y) ? y : X) 
+
 
 _FCL_NAMESPACE_BEGIN
 
@@ -81,19 +82,29 @@ template<class _Ty>
 struct fwd_iterator
 {
     using iterator_category = _FCL::forward_iterator_tag;
-    using value_type = _Ty;
+    using value_type = remove_const_t<_Ty>;
     using difference_type = ptrdiff_t;
     using pointer = _Ty*;
     using reference = _Ty&;
 
-    fwd_iterator(const pointer counter)
+    fwd_iterator(value_type* counter)
         : _m_Pointer(counter)
+    { }
+
+    fwd_iterator(const value_type* counter)
+        : _m_Pointer(const_cast<value_type*>(counter))
     { }
 
     constexpr reference operator++() noexcept
     {
         _m_Pointer++;
         return *_m_Pointer;
+    }
+
+    constexpr pointer operator++(int) noexcept
+    {
+        _m_Pointer++;
+        return _m_Pointer;
     }
 
     constexpr _Ty& operator*() noexcept
@@ -254,7 +265,7 @@ struct fwd_iterator_const
         return !operator==(it);
     }
 
-    constexpr pointer operator+(size_t offset) noexcept
+    constexpr pointer operator+(size_t offset) const noexcept
     {
         return _m_Pointer + offset;
     }
@@ -286,48 +297,6 @@ distance(_Inpy begin, _Inpy end)
     }
 
     return __di;
-}
-
-template<class _Fitery, class _Ty>
-constexpr _Fitery remove(_Fitery _begin, _Fitery _end, const _Ty& _value)
-{
-    auto __iter = find(_begin, _end, _value);
-    if (__iter == _end)
-    {
-        return _begin;
-    }
-
-    for (_Fitery __i = _begin; ++__i != *_end;)
-    {
-        if (!(*__i != _value))
-        {
-            /* For some reason, clang rejects `*(begin++)`.
-               We have to use this FCL-specific behaviour. */
-            *(_begin + 1) = move(*__i);
-        }
-    }
-
-    return _begin;
-}
-
-template<class _Fitery, class _Predy>
-constexpr _Fitery remove_if(_Fitery _begin, _Fitery _end, _Predy _predicate)
-{
-    auto __iter = find_if(_begin, _end, _predicate);
-    if (__iter == _end)
-    {
-        return _begin;
-    }
-
-    for (_Fitery __i = _begin; ++__i != *_end;)
-    {
-        if (!_predicate(*__i))
-        {
-            *(_begin + 1) = move(*__i);
-        }
-    }
-
-    return _begin;
 }
 
 _FCL_NAMESPACE_END

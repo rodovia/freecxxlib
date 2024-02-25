@@ -1,19 +1,23 @@
 #pragma once
 
+#include "internals/algorithmbase.h"
 #include "internals/btypes.h"
 #include "internals/iterator.h"
+#include <memory>
 #include <type_traits>
 
 _FCL_NAMESPACE_BEGIN
 
 template<class _Ty>
-constexpr const _Ty& min(const _Ty& a, const _Ty& b)
+constexpr inline 
+const _Ty& min(const _Ty& a, const _Ty& b)
 {
     return (a < b) ? a : b;
 }
 
 template<class _Ty>
-constexpr const _Ty& max(const _Ty&a, const _Ty& b)
+constexpr inline
+const _Ty& max(const _Ty&a, const _Ty& b)
 {
     return (a > b) ? a : b;
 }
@@ -21,29 +25,13 @@ constexpr const _Ty& max(const _Ty&a, const _Ty& b)
 template<class _Itery, class _Ty>
 constexpr _Itery find(_Itery first, _Itery last, const _Ty& value)
 {
-    for (_Itery i = first; i != last; ++i)
-    {
-        if (*i == value)
-        {
-            return i;
-        }
-    }
-
-    return last;
+    return __fcl::find_if(first, last, __fcl::equals_with(value));
 }
 
 template<class _Itery, class _Predy>
 constexpr _Itery find_if(_Itery first, _Itery last, _Predy predicate)
 {
-    for (_Itery i = first; i != last; ++i)
-    {
-        if (predicate(*i))
-        {
-            return i;
-        }
-    }
-
-    return last;
+    return __fcl::find_if(first, last, predicate);
 }
 
 template<class _Inpy, class _Outery>
@@ -56,6 +44,18 @@ constexpr _Outery copy(_Inpy begin, _Inpy end, _Outery result)
     }
 
     return result + __distance;
+}
+
+template<class _Fitery, class _Ty>
+constexpr _Fitery remove(_Fitery _begin, _Fitery _end, const _Ty& _value)
+{
+    return __fcl::__removeif(_begin, _end, __fcl::equals_with(_value));
+}
+
+template<class _Fitery, class _Predy>
+constexpr _Fitery remove_if(_Fitery _begin, _Fitery _end, _Predy _predicate)
+{
+    return __fcl::__removeif(_begin, _end, _predicate);
 }
 
 _FCL_NAMESPACE_END

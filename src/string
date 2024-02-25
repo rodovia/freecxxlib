@@ -10,7 +10,13 @@
 #include "algorithm"
 #include "type_traits"
 
+#include "terminal.h"
+
 _FCL_NAMESPACE_BEGIN
+
+template<class _Cy, class _Try, class _Ty>
+inline constexpr bool __generic_opchk = is_convertible<const _Ty&, basic_string_view<_Cy, _Try>>() &&
+                                        !is_convertible<const _Ty&, const _Cy*>();
 
 template<class _Cy, class _Try = char_traits<_Cy>, class _Aly = allocator<_Cy>>
 class basic_string
@@ -190,8 +196,6 @@ public:
         }
     }
 
-    /* clear was omitted. */
-
     [[nodiscard]] constexpr bool empty() const noexcept
     {
         return _m_Length == 0;
@@ -254,9 +258,21 @@ public:
         return this->append(buffer, _Try::length(buffer));
     }
 
+    constexpr basic_string& append(size_type _n, _Cy _c)
+    {
+        if (_m_Length + _n >= _m_Capacity)
+        {
+            this->resize_buffers(_m_Capacity + _n);
+        }
+
+        _Try::assign(_m_Buffer + _m_Length, _n, _c);
+        _m_Length += _n;
+        return *this;
+    }
+
     constexpr void push_back(_Cy c)
     {
-        this->append(1, c);
+        this->append(size_type(1), c);
     }
 
     constexpr basic_string& assign(const basic_string& str)
@@ -293,7 +309,7 @@ public:
             pos = _m_Length;
         }
     
-        if (size > _m_Capacity)
+        if (size >= _m_Capacity)
         {
             this->resize_buffers(_m_Capacity + size);
         }
@@ -304,6 +320,11 @@ public:
     }
 
     constexpr const _Cy* data() const noexcept
+    {
+        return _m_Buffer;
+    }
+
+    constexpr _Cy* data() noexcept
     {
         return _m_Buffer;
     }
@@ -348,7 +369,7 @@ public:
 
     constexpr basic_string substr(size_type pos = 0, size_type n = npos)
     {
-        return basic_string(std::move(*this), pos, n);
+        return basic_string(*this, pos, n);
     }
 
     constexpr void swap(basic_string& str)
@@ -359,15 +380,42 @@ public:
         std::swap(_m_Allocator, str._m_Allocator);
     }
 
+    constexpr void clear() noexcept
+    {
+        _m_Length = 0;
+    }
+
+    constexpr basic_string& operator+=(const basic_string& _str)
+    {
+        return this->append(_str);
+    }
+
+    constexpr basic_string& operator+=(_Cy c)
+    {
+        return this->append(size_type(1), c);
+    }
+
+    constexpr void reserve(size_type _newsize)
+    {
+        if (_newsize > _m_Capacity)
+        {
+            this->resize_buffers(_newsize);
+        }
+    }
+
 private:
     constexpr void resize_buffers(size_type newsize)
     {
-        size_type factual = newsize < _m_Length ? _m_Length : newsize;
-        _Cy* neobuffer = _m_Allocator.allocate(newsize);
-        _Try::copy(neobuffer, _m_Buffer, factual);
+        size_type factual = __fclmax(_m_Capacity, newsize);
+        _Cy* neobuffer = _m_Allocator.allocate(factual);
+        _FCL::swap(neobuffer, _m_Buffer);
 
-        std::swap(neobuffer, _m_Buffer);
-        _m_Allocator.deallocate(neobuffer, 0);
+        if (neobuffer != nullptr)
+        {
+            _Try::copy(_m_Buffer, neobuffer, factual);
+            _m_Allocator.deallocate(neobuffer, _m_Capacity);
+        }
+
         _m_Capacity = newsize;
     }
 
@@ -379,22 +427,22 @@ private:
 };
 
 template<class _Cy, class _Try, class _Aly>
-constexpr bool operator==(std::basic_string<_Cy, _Try, _Aly>& lhs, 
-                            std::basic_string<_Cy, _Try, _Aly> rhs)
+constexpr bool operator==(basic_string<_Cy, _Try, _Aly>& lhs, 
+                            basic_string<_Cy, _Try, _Aly> rhs)
 {
     return lhs.compare(rhs) == 0;
 }
 
 template<class _Cy, class _Try, class _Aly>
-constexpr bool operator==(std::basic_string<_Cy, _Try, _Aly> lhs, 
+constexpr bool operator==(basic_string<_Cy, _Try, _Aly> lhs, 
                             const _Cy* rhs)
 {
     return lhs.compare(rhs) == 0;
 }
 
 template<class _Cy, class _Try, class _Aly>
-constexpr void swap(std::basic_string<_Cy, _Try, _Aly>& lhs,
-                    std::basic_string<_Cy, _Try, _Aly>& rhs) noexcept
+constexpr void swap(basic_string<_Cy, _Try, _Aly>& lhs,
+                    basic_string<_Cy, _Try, _Aly>& rhs) noexcept
 {
     lhs.swap(rhs);
 }

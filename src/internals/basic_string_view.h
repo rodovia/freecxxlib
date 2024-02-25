@@ -60,10 +60,13 @@ struct char_traits<char>
 
     static constexpr size_t length(const char_type* string)
     {
-        /* TODO: someday remove this const cast */
+#if !__has_builtin(__builtin_memcpy)
         char_type* b = const_cast<char_type*>(string);
         while(*b != 0) ++b;
         return b - string;
+#else
+        return __builtin_strlen(string);
+#endif
     }
 
     static constexpr const char_type* find(const char_type* s, size_t n,
@@ -101,14 +104,16 @@ struct char_traits<char>
         return s1;
     }
 
-    static constexpr char_type* copy(char_type* s1, const char_type* s2, size_t n)
+    static constexpr char_type* copy(char_type* dst, const char_type* src, size_t n)
     {
+#if !__has_builtin(__builtin_memcpy)
         for (size_t c = 0; c < n; c++)
-        {
-            s1[c] = s2[c];
-        }
+            dst[c] = src[c];
 
         return s1;
+#else
+    return static_cast<char_type*>(__builtin_memcpy(dst, src, n * sizeof(char_type)));
+#endif
     }
 
     static constexpr char_type* assign(char_type* s, size_t n, char_type a)
@@ -234,6 +239,12 @@ public:
     constexpr void swap(basic_string_view& rhs) noexcept
     {
         _FCL::swap(*this, rhs);
+    }
+
+    constexpr basic_string_view substr(size_type _pos = 0, size_type _len = npos) const
+    {
+        size_type __eff = min(_len, _m_Length - _pos);
+        return basic_string_view(_m_Buffer + _pos, __eff);
     }
 
     constexpr size_type copy(pointer string, size_type size, size_type pos = 0) const
