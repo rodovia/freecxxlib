@@ -1,6 +1,7 @@
 #pragma once
 
 #include "btypes.h"
+#include <utility>
 
 namespace __fcl
 {
@@ -28,27 +29,12 @@ constexpr _Itery find_if(_Itery first, _Itery last, _Predy predicate)
     return last;
 }
 
-template<class _Fitery, class _Predy>
-constexpr _Fitery __removeif(_Fitery _begin, _Fitery _end, _Predy _predicate)
+template<class _Itery, class _Ty>
+constexpr _Itery find(_Itery first, _Itery last, const _Ty& value)
 {
-    auto __iter = find_if(_begin, _end, _predicate);
-    if (__iter == _end)
-    {
-        return _begin;
-    }
-    
-    _Fitery __result = _begin;
-    ++_begin;
-    for (; _begin != _end; ++_begin)
-    {
-        if (!_predicate(*_begin))
-        {
-            *(__result) = move(*_begin);
-            __result++;
-        }
-    }
-
-    return __result;
+    return __fcl::find_if(first, last, __fcl::equals_with(value));
 }
 
 }
+
+#include "remove.h"

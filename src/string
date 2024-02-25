@@ -48,7 +48,7 @@ public:
     {
         _Cy* buffer = _m_Allocator.allocate(_m_Capacity);
         _Try::move(buffer, str._m_Buffer + pos, _m_Length);
-        std::swap(_m_Buffer, buffer);
+        _FCL::swap(_m_Buffer, buffer);
     }
 
     constexpr basic_string(basic_string&& str, size_type pos,
@@ -95,15 +95,15 @@ public:
     {
         _Cy* buffer = _m_Allocator.allocate(_m_Capacity);
         _Try::move(buffer, str._m_Buffer, _m_Length);
-        std::swap(_m_Buffer, buffer);
+        _FCL::swap(_m_Buffer, buffer);
     }
 
     constexpr basic_string(basic_string&& str) noexcept
     {
-        std::swap(_m_Length, str._m_Length);
-        std::swap(_m_Capacity, str._m_Capacity);
-        std::swap(_m_Buffer, str._m_Buffer);
-        std::swap(_m_Allocator, str._m_Allocator);
+        _FCL::swap(_m_Length, str._m_Length);
+        _FCL::swap(_m_Capacity, str._m_Capacity);
+        _FCL::swap(_m_Buffer, str._m_Buffer);
+        _FCL::swap(_m_Allocator, str._m_Allocator);
     }
 
     constexpr basic_string(const _Cy* str, size_type n, const _Aly& a = _Aly())
@@ -149,7 +149,7 @@ public:
         _Cy* buffer = _m_Allocator.allocate(_m_Capacity);
 
         _Try::move(buffer, str._m_Buffer, _m_Length);
-        std::swap(buffer, _m_Buffer);
+        _FCL::swap(buffer, _m_Buffer);
 
         if (buffer != nullptr)
         {
@@ -160,7 +160,7 @@ public:
 
     constexpr basic_string& operator=(basic_string&& str) noexcept
     {
-        std::swap(_m_Buffer, str._m_Buffer);
+        _FCL::swap(_m_Buffer, str._m_Buffer);
         _m_Length = str._m_Length;
         _m_Capacity = str._m_Capacity;
         return *this;
@@ -336,7 +336,7 @@ public:
 
     constexpr int compare(basic_string rhs) const noexcept
     {
-        size_type rlen = std::min(_m_Length, rhs._m_Length);
+        size_type rlen = _FCL::min(_m_Length, rhs._m_Length);
         int res = _Try::compare(_m_Buffer, rhs._m_Buffer, rlen);
 
         if (res != 0)
@@ -374,10 +374,10 @@ public:
 
     constexpr void swap(basic_string& str)
     {
-        std::swap(_m_Buffer, str._m_Buffer);
-        std::swap(_m_Length, str._m_Length);
-        std::swap(_m_Capacity, str._m_Capacity);
-        std::swap(_m_Allocator, str._m_Allocator);
+        _FCL::swap(_m_Buffer, str._m_Buffer);
+        _FCL::swap(_m_Length, str._m_Length);
+        _FCL::swap(_m_Capacity, str._m_Capacity);
+        _FCL::swap(_m_Allocator, str._m_Allocator);
     }
 
     constexpr void clear() noexcept

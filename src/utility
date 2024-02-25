@@ -13,10 +13,4 @@ constexpr void swap(_Ty& item1, _Ty& item2) noexcept
     item2 = tmp;
 }
 
-template<class _Ty> 
-constexpr remove_reference_t<_Ty>&& move(_Ty&& t) noexcept
-{
-    return static_cast<remove_reference_t<_Ty>&&>(t);
-}
-
 _FCL_NAMESPACE_END

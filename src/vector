@@ -255,7 +255,7 @@ public:
 
     constexpr void erase(iterator item)
     {
-        _FCL::remove<iterator, _Ty>(item, item + 1, *item);
+        _FCL::remove<iterator, _Ty>(item, end(), *item);
         __fcl::destroy_one(_FCL::addressof(item));
         _m_Length--;
     }

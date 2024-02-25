@@ -95,10 +95,10 @@ struct fwd_iterator
         : _m_Pointer(const_cast<value_type*>(counter))
     { }
 
-    constexpr reference operator++() noexcept
+    constexpr fwd_iterator operator++() noexcept
     {
         _m_Pointer++;
-        return *_m_Pointer;
+        return _m_Pointer;
     }
 
     constexpr pointer operator++(int) noexcept
@@ -284,7 +284,7 @@ constexpr typename iterator_traits<_Inpy>::difference_type
 distance(_Inpy begin, _Inpy end)
 {
     using _Try = iterator_traits<_Inpy>;
-    if constexpr (std::is_same<typename _Try::iterator_category, 
+    if constexpr (_FCL::is_same<typename _Try::iterator_category, 
                                 random_access_iterator_tag>())
     {
         return (end - begin);

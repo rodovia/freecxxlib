@@ -2,7 +2,6 @@
 
 #include "internals/algorithmbase.h"
 #include "internals/btypes.h"
-#include "internals/iterator.h"
 #include <memory>
 #include <type_traits>
 
@@ -25,7 +24,7 @@ const _Ty& max(const _Ty&a, const _Ty& b)
 template<class _Itery, class _Ty>
 constexpr _Itery find(_Itery first, _Itery last, const _Ty& value)
 {
-    return __fcl::find_if(first, last, __fcl::equals_with(value));
+    return __fcl::find(first, last, value);
 }
 
 template<class _Itery, class _Predy>
@@ -49,13 +48,7 @@ constexpr _Outery copy(_Inpy begin, _Inpy end, _Outery result)
 template<class _Fitery, class _Ty>
 constexpr _Fitery remove(_Fitery _begin, _Fitery _end, const _Ty& _value)
 {
-    return __fcl::__removeif(_begin, _end, __fcl::equals_with(_value));
-}
-
-template<class _Fitery, class _Predy>
-constexpr _Fitery remove_if(_Fitery _begin, _Fitery _end, _Predy _predicate)
-{
-    return __fcl::__removeif(_begin, _end, _predicate);
+    return __fcl::remove(_begin, _end, _value);
 }
 
 _FCL_NAMESPACE_END
