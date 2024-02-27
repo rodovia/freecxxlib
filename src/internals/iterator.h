@@ -87,12 +87,8 @@ struct fwd_iterator
     using pointer = _Ty*;
     using reference = _Ty&;
 
-    fwd_iterator(value_type* counter)
+    fwd_iterator(pointer counter)
         : _m_Pointer(counter)
-    { }
-
-    fwd_iterator(const value_type* counter)
-        : _m_Pointer(const_cast<value_type*>(counter))
     { }
 
     constexpr fwd_iterator operator++() noexcept
@@ -297,6 +293,28 @@ distance(_Inpy begin, _Inpy end)
     }
 
     return __di;
+}
+
+template<class _Inpy, class _Dy>
+constexpr void advance(_Inpy& __iter, _Dy __n)
+{
+    if constexpr (!is_same_v<typename _Inpy::iterator_category, 
+                            _FCL::bidirectional_iterator_tag>)
+    {
+        if (__n < 0) 
+            return;
+    }
+    else {
+        if (__n < 0)
+        {
+            for (_Dy __i = 0; __i > __n; __i--)
+                __iter--;
+            return;
+        }
+    }
+
+    for (_Dy __i = 0; __i < __n; __i++)
+        __iter++;
 }
 
 _FCL_NAMESPACE_END
